@@ -1,0 +1,12 @@
+﻿●   glew: Win32
+	glew32.dll
+	glew32.lib
+	glew32s.lib
+●   assimp:
+	Debug-Win32: assimp.lib
+	Debug:
+		Assimp32d.dll
+		Assimp64d.dll
+	Release:
+		Assimp32.dll
+		Assimp64.dll

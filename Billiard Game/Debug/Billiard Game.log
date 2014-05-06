@@ -1,0 +1,24 @@
+﻿Build started 5/6/2014 9:50:15 AM.
+     1>Project "D:\Computer graphics\Project\Billiard Game\Billiard Game.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"D:\Computer graphics\Project\/Libraries/include" /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt camera.cpp main.cpp
+         main.cpp
+     1>d:\computer graphics\project\libraries\include\gl\glu.h(33): warning C4068: unknown pragma
+         Generating Code...
+         Skipping... (no relevant changes detected)
+         camera.cpp
+       Link:
+         C:\Program Files\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Computer graphics\Project\Debug\Billiard Game.exe" /INCREMENTAL /NOLOGO /LIBPATH:"D:\Computer graphics\Project\/Libraries/lib" opengl32.lib glu32.lib glut32.lib glew32.lib devIL.lib ilu.lib ilut.lib assimp.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Computer graphics\Project\Debug\Billiard Game.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Computer graphics\Project\Debug\Billiard Game.lib" /MACHINE:X86 Debug\camera.obj
+         Debug\light.obj
+         Debug\main.obj
+         Debug\material.obj
+         Debug\mesh.obj
+         Debug\model3D.obj
+         Debug\shader.obj
+         Debug\vertex.obj
+         Billiard Game.vcxproj -> D:\Computer graphics\Project\Debug\Billiard Game.exe
+     1>Done Building Project "D:\Computer graphics\Project\Billiard Game\Billiard Game.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.22
