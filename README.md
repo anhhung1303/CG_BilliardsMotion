@@ -1,5 +1,5 @@
 [CG] Billiards Motion
-==================
+=====================
 
 [Computer Graphics] Simulating collisions of billiard motion using OpenGL
 
