@@ -22,14 +22,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resource\logo-dai-hoc-cong-nghe.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resource\TextureDemo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Main File</Filter>
     </ClCompile>
@@ -52,6 +44,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="model3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,5 +78,22 @@
     <ClInclude Include="model3D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="node.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shader\shader.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Resource\Shader\shader.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

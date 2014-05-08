@@ -1,38 +1,43 @@
 #pragma once
 
-#include "vertex.hpp"
-#include "material.hpp"
-
-#include <gl/glew.h>
-
 #include <vector>
 
-/*
-* @breif contain a set of Vertex
-*/
+#include <gl/glew.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
+#include "vertex.hpp"
+#include "material.hpp"
+#include "texture.hpp"
+#include "util.hpp"
+
+#define CLEAR_MESH		0x1
+#define CLEAR_MATERIAL	0x2
+#define CLEAR_TEXTURE	0x4
+
 class Mesh{
 public:
+	static GLuint aPositionLoc;
+	static GLuint aNormalLoc;
+	static GLuint aTexCoordLoc;
+
 	Mesh();
-	Mesh(const std::vector<Vertex>& vertices,
-		const std::vector<unsigned int>& indices);
 	virtual ~Mesh();
-	void clear();
 
-	void setVertices(const std::vector<Vertex>& vertices);
-	void setIndices(const std::vector<GLuint>& indices);
-	void setMaterial(Material* material);
+	void setMesh(const aiMesh* mesh);
+	void setMaterial(const Material* material);
+	void setTexture(const Texture* texture);
 
-	GLuint getVertexBufferID() const;
-	GLuint getIndexBufferID() const;
-	GLuint getNumVertices() const;
-	GLuint getNumIndices() const;
-	GLuint getVertexBufferData() const;
-	GLuint getIndexBufferData() const;
-	Material* getMaterial() const;
+	void clear(GLenum option = CLEAR_MESH | CLEAR_MATERIAL | CLEAR_TEXTURE);
+
+	GLuint getVertexBufferObject() const;
+	GLuint getNumFaces() const;
+	const Material* getMaterial() const;
+	const Texture* getTexture() const;
 private:
-	GLuint vertexBufferID;
-	GLuint indexBufferID;
-	GLuint numVertices;
-	GLuint numIndices;
-	Material* material;
+	GLuint vbo;
+	GLuint numFaces;
+
+	const Material* material;
+	const Texture* texture;
 };

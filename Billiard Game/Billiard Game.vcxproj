@@ -49,7 +49,8 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/Libraries/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glut32.lib;glew32.lib;devIL.lib;ilu.lib;ilut.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glut32.lib;glew32.lib;devil.lib;ilu.lib;ilut.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -73,12 +74,11 @@
     <ClCompile Include="material.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model3D.cpp" />
+    <ClCompile Include="node.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="texture.cpp" />
+    <ClCompile Include="util.cpp" />
     <ClCompile Include="vertex.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Resource\logo-dai-hoc-cong-nghe.jpg" />
-    <Image Include="Resource\TextureDemo.png" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
@@ -86,8 +86,15 @@
     <ClInclude Include="material.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="model3D.hpp" />
+    <ClInclude Include="node.hpp" />
     <ClInclude Include="shader.hpp" />
+    <ClInclude Include="texture.hpp" />
+    <ClInclude Include="util.hpp" />
     <ClInclude Include="vertex.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shader\shader.frag" />
+    <None Include="Resource\Shader\shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
