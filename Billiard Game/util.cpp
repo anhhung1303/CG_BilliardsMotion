@@ -48,7 +48,7 @@ void displayAISceneInfo(const aiScene* scene){
 	fprintf(stdout, "mNumMeshes: %d\n", scene->mNumMeshes);
 	fprintf(stdout, "mNumTextures: %d\n", scene->mNumTextures);
 
-	for (int i = 0; i < scene->mNumMaterials; i++){
+	for (unsigned int i = 0; i < scene->mNumMaterials; i++){
 		const aiMaterial* material = scene->mMaterials[i];
 		fprintf(stdout, "Material %d\n", i);
 
@@ -116,7 +116,17 @@ void displayAISceneInfo(const aiScene* scene){
 
 }
 
-std::ostream& operator<<(std::ostream& os, const glm::mat4 matrix){
+std::ostream& operator<<(std::ostream& os, const glm::mat4& matrix){
+	for (int i = 0; i < 4; i++){
+		for (int j = 0; j < 4; j++){
+			os << std::setw(10) << std::setprecision(5) << matrix[i][j];
+		}
+		os << std::endl;
+	}
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const aiMatrix4x4& matrix){
 	for (int i = 0; i < 4; i++){
 		for (int j = 0; j < 4; j++){
 			os << std::setw(10) << std::setprecision(5) << matrix[i][j];

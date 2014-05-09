@@ -1,16 +1,16 @@
 #version 330
 
-layout (location = 0) in vec3 Position;
-layout (location = 1) in vec2 TexCoord;
-layout (location = 2) in vec3 Normal;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 texCoord;
+layout (location = 2) in vec3 normal;
 
-uniform mat4 gMVP;
+uniform mat4 uMVPMatrix;
 
-out vec2 TexCoord0;
-out vec3 Normal0;
+out vec2 TexCoord;
+out vec3 Normal;
 
 void main(){
-    gl_Position = gMVP * vec4(Position, 1.0);
-    TexCoord0 = TexCoord;
-    Normal0 = (gMVP * vec4(Normal, 0.0)).xyz;
+    gl_Position = uMVPMatrix * vec4(position, 1.0);
+    TexCoord = texCoord;
+    Normal = (uMVPMatrix * vec4(normal, 0.0)).xyz;
 }

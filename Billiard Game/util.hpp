@@ -14,6 +14,15 @@
 #include <assert.h>
 #include <sys/stat.h>
 
+const static glm::vec3 xAxis(1.0f, 0.0f, 0.0f);
+const static glm::vec3 yAxis(0.0f, 1.0f, 0.0f);
+const static glm::vec3 zAxis(0.0f, 0.0f, 1.0f);
+const static glm::vec2 zeroVec2(0.0f);
+const static glm::vec3 zeroVec3(0.0f);
+const static glm::vec4 zeroVec4(0.0f);
+const static glm::mat3 idMat3(1.0f);
+const static glm::mat4 idMat4(1.0f);
+
 bool fileIsExist(const std::string& path);
 
 std::string getSource(const std::string& path);
@@ -24,4 +33,5 @@ std::string parsingDirectory(const std::string& path);
 
 void displayAISceneInfo(const aiScene* scene);
 
-std::ostream& operator<<(std::ostream& os, const glm::mat4 matrix);
+std::ostream& operator<<(std::ostream& os, const glm::mat4& matrix);
+std::ostream& operator<<(std::ostream& os, const aiMatrix4x4& matrix);

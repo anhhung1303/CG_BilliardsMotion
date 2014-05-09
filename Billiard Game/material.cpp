@@ -1,6 +1,6 @@
 #include "material.hpp"
 
-GLuint Material::uMaterialBlockLoc = 1;
+GLuint Material::uboMaterialLoc = 1;
 
 Material::Material(){
 	clear();
@@ -11,7 +11,7 @@ Material::~Material(){
 }
 
 void Material::clear(){
-	glDeleteBuffers(1, &uMaterialBlockBuffer);
+	glDeleteBuffers(1, &uboMaterial);
 }
 
 bool Material::setMaterial(const aiMaterial* material){
@@ -37,15 +37,15 @@ bool Material::setMaterial(const aiMaterial* material){
 	unsigned int max;
 	aiGetMaterialFloatArray(material, AI_MATKEY_SHININESS, &uMaterial.shininess, &max);
 
-	glGenBuffers(1, &uMaterialBlockBuffer);
-	glBindBuffer(GL_UNIFORM_BUFFER, uMaterialBlockBuffer);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(UniformMaterialBlock), (void*)(&uMaterial), GL_STATIC_DRAW);
-	glBindBufferRange(GL_UNIFORM_BUFFER, uMaterialBlockLoc, uMaterialBlockBuffer, 0, sizeof(UniformMaterialBlock));
+	glGenBuffers(1, &uboMaterial);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMaterial);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(MaterialBlock), (void*)(&uMaterial), GL_STATIC_DRAW);
+	glBindBufferRange(GL_UNIFORM_BUFFER, uboMaterialLoc, uboMaterial, 0, sizeof(MaterialBlock));
 	glBindBuffer(GL_UNIFORM_BUFFER, NULL);
 
 	return true;
 }
 
-GLuint Material::getMaterialBlockBuffer() const{
-	return this->uMaterialBlockBuffer;
+GLuint Material::getUBOMaterial() const{
+	return this->uboMaterial;
 }

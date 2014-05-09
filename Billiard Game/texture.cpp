@@ -1,6 +1,6 @@
 #include "texture.hpp"
 
-GLuint Texture::uTextureUnitLoc = 0;
+GLuint Texture::uTextureCountLoc = 0;
 
 Texture::Texture(){
 	clear();
@@ -52,11 +52,13 @@ bool Texture::loadTexture(const std::string& path){
 		ilGetInteger(IL_IMAGE_HEIGHT),
 		0, GL_RGBA, GL_UNSIGNED_BYTE,
 		ilGetData());
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 
 	ilDeleteImage(imageID);
+	return true;
 }
 
 GLuint Texture::getTextureUnit() const{

@@ -5,7 +5,7 @@
 #include <assimp/scene.h>
 #include <glm/glm.hpp>
 
-struct UniformMaterialBlock{
+struct MaterialBlock{
 	glm::vec4 ambient;
 	glm::vec4 diffuse;
 	glm::vec4 specular;
@@ -14,17 +14,18 @@ struct UniformMaterialBlock{
 };
 
 class Material{
+private:
+	MaterialBlock uMaterial;
+
+	//Uniform Buffer Object of Material
+	GLuint uboMaterial;
 public:
-	static GLuint uMaterialBlockLoc;
+	static GLuint uboMaterialLoc;
 
 	Material();
 	virtual ~Material();
 
 	void clear();
 	bool setMaterial(const aiMaterial* material);
-	GLuint getMaterialBlockBuffer() const;
-private:
-	UniformMaterialBlock uMaterial;
-
-	GLuint uMaterialBlockBuffer;
+	GLuint getUBOMaterial() const;
 };

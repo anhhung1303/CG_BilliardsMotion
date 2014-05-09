@@ -95,6 +95,8 @@
   <ItemGroup>
     <None Include="Resource\Shader\shader.frag" />
     <None Include="Resource\Shader\shader.vert" />
+    <None Include="test_binding.inl" />
+    <None Include="test_mesh.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

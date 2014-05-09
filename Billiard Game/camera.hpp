@@ -2,22 +2,32 @@
 
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+
+#include <vector>
+
+#include "util.hpp"
 
 class Camera{
+private:
+	std::vector<glm::mat4> viewMatrixStack;
+	std::vector<glm::mat4>::iterator cur;
 public:
-	Camera(glm::mat4 viewMatrix = glm::mat4(1.0f));
+	Camera(const glm::mat4& viewMatrix = glm::mat4(1.0f));
 	virtual ~Camera();
 
-	void setViewMatrix(glm::mat4 viewMatrix);
-	void lookAt(glm::vec3 eye, glm::vec3 centre, glm::vec3 up);
+	void lookAt(const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up);
+	void setViewMatrix(const glm::mat4& viewMatrix);
 	const glm::mat4& getViewMatrix() const;
 
-	void translate(glm::vec3 distance);
+	void translate(const glm::vec3& distance);
 	void translate(float dx, float dy, float dz);
-	void rotate(float angle, glm::vec3 direction);
+	void rotate(float angle, const glm::vec3& direction);
 	void rotate(float angle, float ox, float oy, float oz);
 	void zoom(float coef);
-private:
-	glm::mat4 viewMatrix;
+
+	void push();
+	void pop();
+	const glm::mat4& backUp(int index);
+	void clear();
 };

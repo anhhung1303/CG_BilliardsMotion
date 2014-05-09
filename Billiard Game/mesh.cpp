@@ -1,9 +1,8 @@
 #include "mesh.hpp"
 
-
-GLuint Mesh::aPositionLoc = 1;
+GLuint Mesh::aPositionLoc = 0;
+GLuint Mesh::aTexCoordLoc = 1;
 GLuint Mesh::aNormalLoc = 2;
-GLuint Mesh::aTexCoordLoc = 3;
 
 Mesh::Mesh(){
 	clear(CLEAR_MESH | CLEAR_MATERIAL | CLEAR_TEXTURE);
@@ -13,34 +12,45 @@ Mesh::~Mesh(){
 	clear(CLEAR_MESH | CLEAR_MATERIAL | CLEAR_TEXTURE);
 }
 
+#include "test_mesh.inl"
 void Mesh::setMesh(const aiMesh* mesh){
 	clear(CLEAR_MESH);
 	GLuint buffer;
 
-	glGenVertexArrays(1, &vbo);
-	glBindVertexArray(vbo);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
-	this->numFaces = mesh->mNumFaces;
+	////create array with faces
+	////have to convert from Assimp format to array
+	//std::vector<unsigned int> indices;
+	//for (unsigned int i = 0; i < mesh->mNumFaces; i++){
+	//	const aiFace* face = &mesh->mFaces[i];
+	//	assert(face->mNumIndices == 3); //If mNumIndices != 3, program rase error
+	//	indices.insert(indices.end(), face->mIndices, face->mIndices + sizeof(unsigned int) * (face->mNumIndices - 1));
+	//}
+	//this->numIndices = indices.size();
 
-	// create array with faces
-	// have to convert from Assimp format to array
-	std::vector<unsigned int> indices;
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++){
+	//// buffer for faces
+	//glGenBuffers(1, &buffer);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+
+	unsigned int *faceArray;
+	this->numIndices = mesh->mNumFaces * 3;
+	faceArray = new unsigned int[this->numIndices];
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace* face = &mesh->mFaces[i];
-		assert(face->mNumIndices == 3); //If mNumIndices != 3, program rase error
-		indices.insert(indices.end(), face->mIndices, face->mIndices + face->mNumIndices);
+		memcpy(&faceArray[3 * i], face->mIndices, 3 * sizeof(unsigned int));
 	}
-
-	// buffer for faces
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)* mesh->mNumFaces * 3, faceArray, GL_STATIC_DRAW);
 
 	// buffer for vertex positions
 	if (mesh->HasPositions()) {
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(aiVector3D) * mesh->mNumVertices, mesh->mVertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(aiVector3D)* mesh->mNumVertices, mesh->mVertices, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(aPositionLoc);
 		glVertexAttribPointer(aPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	}
@@ -49,7 +59,7 @@ void Mesh::setMesh(const aiMesh* mesh){
 	if (mesh->HasNormals()) {
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(aiVector3D) * mesh->mNumVertices, mesh->mNormals, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(aiVector3D)* mesh->mNumVertices, mesh->mNormals, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(aNormalLoc);
 		glVertexAttribPointer(aNormalLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	}
@@ -59,7 +69,7 @@ void Mesh::setMesh(const aiMesh* mesh){
 	if (mesh->HasTextureCoords(0)) {
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(aiVector3D) * mesh->mNumVertices, mesh->mTextureCoords[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(aiVector3D)* mesh->mNumVertices, mesh->mTextureCoords[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(aTexCoordLoc);
 		glVertexAttribPointer(aTexCoordLoc, 2, GL_FLOAT, GL_FALSE, sizeof(aiVector3D), 0);
 	}
@@ -80,8 +90,8 @@ void Mesh::setTexture(const Texture* texture){
 
 void Mesh::clear(GLenum option){
 	if ((option & CLEAR_MESH) != 0x0){
-		glDeleteVertexArrays(1, &vbo);
-		numFaces = 0;
+		glDeleteVertexArrays(1, &vao);
+		numIndices = 0;
 	}
 	if ((option & CLEAR_MATERIAL) != 0x0){
 		material = NULL;
@@ -91,12 +101,12 @@ void Mesh::clear(GLenum option){
 	}
 }
 
-GLuint Mesh::getVertexBufferObject() const{
-	return this->vbo;
+GLuint Mesh::getVAO() const{
+	return this->vao;
 }
 
-GLuint Mesh::getNumFaces() const{
-	return this->numFaces;
+GLuint Mesh::getNumIndices() const{
+	return this->numIndices;
 }
 
 const Material* Mesh::getMaterial() const{

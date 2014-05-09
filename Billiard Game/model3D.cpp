@@ -24,6 +24,7 @@ void Model3D::clear(){
 	meshes.clear();
 	materials.clear();
 	textures.clear();
+	root = NULL;
 }
 
 bool Model3D::loadModel(const std::string& path){
@@ -110,53 +111,77 @@ void Model3D::importNodes(const aiScene* scene){
 }
 
 Node* Model3D::builtNode(const aiNode* node){
-	Node* not = new Node();
+	if (node == NULL){
+		return NULL;
+	}
+	Node* nod = new Node();
 
-	not->modelMatrix = convertToGLM(node->mTransformation);
+	nod->modelMatrix = convertToGLM(node->mTransformation);
 	for (unsigned int i = 0; i < node->mNumMeshes; i++){
 		int mesIndex = node->mMeshes[i];
-		not->content.push_back(meshes[mesIndex]);
+		nod->content.push_back(meshes[mesIndex]);
 	}
 	for (unsigned int i = 0; i < node->mNumChildren; i++){
 		Node* child = builtNode(node->mChildren[i]);
-		not->children.push_back(child);
+		nod->children.push_back(child);
 	}
-	return not;
+	return nod;
+}
+
+void Model3D::translate(glm::vec3 distance){
+	root->modelMatrix = glm::translate(distance) * root->modelMatrix;
+}
+
+void Model3D::rotate(float angle, glm::vec3 axis){
+	root->modelMatrix = glm::rotate(angle, axis) * root->modelMatrix;
+}
+
+void Model3D::scale(float scaleFactor){
+	scale(glm::vec3(scaleFactor));
+}
+
+void Model3D::scale(glm::vec3 scaleFactor){
+	root->modelMatrix = glm::scale(scaleFactor) * root->modelMatrix;
 }
 
 void Model3D::render(const glm::mat4& preMatrix){
 	draw(root, preMatrix);
 }
 
-void Model3D::draw(Node* node, const glm::mat4& preMatrix){
+void Model3D::draw(const Node* node, const glm::mat4& preMatrix){
+	if (node == NULL){
+		return;
+	}
+
 	glm::mat4 curMatrix = preMatrix * node->modelMatrix;
-	std::cout << preMatrix;
 	glUniformMatrix4fv(Node::uMVPMatrixLoc, 1, GL_FALSE, glm::value_ptr(curMatrix));
 
-	for (Mesh* mes : node->content){
+	for (const Mesh* mes : node->content){
 		const Material* mat = mes->getMaterial();
 		const Texture* tex = mes->getTexture();
 
 		if (mat != NULL){
-			glBindBufferRange(GL_UNIFORM_BUFFER, Material::uMaterialBlockLoc,
-				mat->getMaterialBlockBuffer(), 0, sizeof(UniformMaterialBlock));
+			glBindBufferRange(GL_UNIFORM_BUFFER, Material::uboMaterialLoc,
+				mat->getUBOMaterial(), 0, sizeof(MaterialBlock));
 		}
 		if (tex != NULL){
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, tex->getTextureUnit());
+			glUniform1i(Texture::uTextureCountLoc, 1);
+		} else {
+			glUniform1i(Texture::uTextureCountLoc, NULL);
 		}
-		glBindVertexArray(mes->getVertexBufferObject());
 
-		glDrawElements(GL_TRIANGLES, mes->getNumFaces() * 3, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(mes->getVAO());	
+		glDrawElements(GL_TRIANGLES, mes->getNumIndices(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(NULL);
 
-		if (mat != NULL){
-		}
 		if (tex != NULL){
 			glBindTexture(GL_TEXTURE_2D, NULL);
 		}
 	}
-
-	for (Node* child : node->children){
+	
+	for (const Node* child : node->children){
 		draw(child, curMatrix);
 	}
 }

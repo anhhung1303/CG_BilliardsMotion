@@ -16,10 +16,17 @@
 #define CLEAR_TEXTURE	0x4
 
 class Mesh{
+private:
+	//Vertex Array Object
+	GLuint vao;
+	GLuint numIndices;
+
+	const Material* material;
+	const Texture* texture;
 public:
 	static GLuint aPositionLoc;
-	static GLuint aNormalLoc;
 	static GLuint aTexCoordLoc;
+	static GLuint aNormalLoc;
 
 	Mesh();
 	virtual ~Mesh();
@@ -30,14 +37,8 @@ public:
 
 	void clear(GLenum option = CLEAR_MESH | CLEAR_MATERIAL | CLEAR_TEXTURE);
 
-	GLuint getVertexBufferObject() const;
-	GLuint getNumFaces() const;
+	GLuint getVAO() const;
+	GLuint getNumIndices() const;
 	const Material* getMaterial() const;
 	const Texture* getTexture() const;
-private:
-	GLuint vbo;
-	GLuint numFaces;
-
-	const Material* material;
-	const Texture* texture;
 };

@@ -20,18 +20,16 @@
       <UniqueIdentifier>{cf471a71-f036-44df-b0e3-fc5e68826168}</UniqueIdentifier>
       <Extensions>vert; frag; vs; fs; glsl</Extensions>
     </Filter>
+    <Filter Include="Test Files">
+      <UniqueIdentifier>{e70ca19e-017a-4bff-b92b-a0be8818ed96}</UniqueIdentifier>
+      <Extensions>inl</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Main File</Filter>
-    </ClCompile>
     <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mesh.cpp">
@@ -55,15 +53,18 @@
     <ClCompile Include="node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Main File</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="light.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vertex.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mesh.hpp">
@@ -87,6 +88,9 @@
     <ClInclude Include="node.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vertex.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shader\shader.frag">
@@ -94,6 +98,12 @@
     </None>
     <None Include="Resource\Shader\shader.vert">
       <Filter>Shader Files</Filter>
+    </None>
+    <None Include="test_mesh.inl">
+      <Filter>Test Files</Filter>
+    </None>
+    <None Include="test_binding.inl">
+      <Filter>Test Files</Filter>
     </None>
   </ItemGroup>
 </Project>

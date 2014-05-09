@@ -14,9 +14,16 @@
 #define VERTEX_COLOR				6
 
 class Vertex{
+private:
+	glm::vec3 pos;	//Position (coordinate) of vertex
+	glm::vec2 tex;	//Texture coordinate
+	glm::vec3 nor;	//Normal vector
+	glm::vec3 tag;	//Tangent vector
+	glm::vec3 bit;	//Bitangent vector
+	glm::vec4 col;	//Color vector (RGBA)
 public:
 	Vertex();
-	virtual ~Vertex();
+	~Vertex();
 
 	void setPosition(const glm::vec3& position);
 	void setTexCoor(const glm::vec2& texCoor);
@@ -33,12 +40,5 @@ public:
 	const glm::vec4& getColor() const;
 
 	static const void* getOffset(int type);
-//private:
-	glm::vec3 pos;	//Position (coordinate) of vertex
-	glm::vec2 tex;	//Texture coordinate
-	glm::vec3 nor;	//Normal vector
-	glm::vec3 tag;	//Tangent vector
-	glm::vec3 bit;	//Bitangent vector
-	glm::vec4 col;	//Color vector (RGBA)
 };
 

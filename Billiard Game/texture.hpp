@@ -10,8 +10,10 @@
 #include "util.hpp"
 
 class Texture{
+private:
+	GLuint texUnit;
 public:
-	static GLuint uTextureUnitLoc;
+	static GLuint uTextureCountLoc;
 
 	Texture();
 	virtual ~Texture();
@@ -19,7 +21,5 @@ public:
 
 	bool loadTexture(const std::string& path);
 	GLuint getTextureUnit() const;
-private:
-	GLuint texUnit;
 };
 
