@@ -1,0 +1,8 @@
+#Models: 2
+ID 0
+FILE "./Resource/Model/Table_billiard N220610.3DS"
+
+#Shaders: 1
+ID 0
+VS "./Resource/Shader/shader.vert"
+FS "./Resource/Shader/shader.frag"

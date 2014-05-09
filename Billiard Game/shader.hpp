@@ -1,20 +1,17 @@
 #pragma once
 
-#include <stdlib.h>
+#include <string>
 
 #include <gl/glew.h>
-#include <gl/glut.h>
 
-#include <fstream>
-#include <string>
+#include "util.hpp"
 
 class Shader{
 public:
-	Shader(const char* path, GLenum shaderType);
+	Shader();
 	Shader(const std::string& path, GLenum shaderType);
 	virtual ~Shader();
 
-	void loadShader(const char* path, GLenum shaderType);
 	void loadShader(const std::string& path, GLenum shaderType);
 
 	GLenum getShaderType() const;
@@ -22,8 +19,6 @@ public:
 private:
 	GLenum shaderType;
 	GLuint shaderID;
-
-	std::string getShaderSource(const char* path) const;
 };
 
 class Program{
@@ -34,8 +29,7 @@ public:
 	void attachShader(Shader* shader);
 	void useProgram(bool usage);
 
-	GLuint getUniformLocation(std::string uniform);
-	GLuint getAttributeLocation(std::string attribute);
+	GLuint getProgram() const;
 private:
 	GLuint shaderProgram;
 };

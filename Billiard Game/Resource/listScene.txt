@@ -1,0 +1,4 @@
+#Scenes: 1
+
+ID 0
+SCENE "./Resource/scene1.txt"

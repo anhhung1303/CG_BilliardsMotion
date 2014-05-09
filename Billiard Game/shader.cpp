@@ -1,26 +1,28 @@
 #include "shader.hpp"
 
-Shader::Shader(const char* path, GLenum shaderType){
-	loadShader(path, shaderType);
+Shader::Shader(){
 }
 
 Shader::Shader(const std::string& path, GLenum shaderType){
-	loadShader(path.data(), shaderType);
+	loadShader(path, shaderType);
 }
 
 Shader::~Shader(){
-	glDeleteShader(shaderID);
+	if (shaderID != NULL){
+		glDeleteShader(shaderID);
+	}
 }
 
-void Shader::loadShader(const char* path, GLenum shaderType){
+void Shader::loadShader(const std::string& path, GLenum shaderType){
 	shaderID = glCreateShader(shaderType);
 	if (shaderID == 0){
 		fprintf(stderr, "Error creating shader type %d\n", shaderType);
 		exit(EXIT_FAILURE);
 	}
 
-	std::string shaderSource = getShaderSource(path);
-	glShaderSource(shaderID, 1, (const GLchar**)shaderSource.data(), NULL);
+	std::string shaderSource = getSource(path);
+	const GLchar *pointer = shaderSource.c_str();
+	glShaderSource(shaderID, 1, (const GLchar**)&pointer, NULL);
 	glCompileShader(shaderID);
 
 	GLint status;
@@ -31,22 +33,6 @@ void Shader::loadShader(const char* path, GLenum shaderType){
 		fprintf(stderr, "Error compiling shader type %d: '%s'\n", shaderType, infoLog);
 		exit(EXIT_FAILURE);
 	}
-}
-
-void Shader::loadShader(const std::string& path, GLenum shaderType){
-	loadShader(path.data(), shaderType);
-}
-
-std::string Shader::getShaderSource(const char* path) const{
-	std::fstream fin(path);
-	if (!fin.is_open()){
-		fprintf(stderr, "Error while opening file %s\n", path);
-		exit(EXIT_FAILURE);
-	}
-	std::string shaderSource((std::istreambuf_iterator<GLchar>(fin)), std::istreambuf_iterator<GLchar>());
-	fin.close();
-
-	return shaderSource;
 }
 
 GLenum Shader::getShaderType() const{
@@ -75,6 +61,8 @@ void Program::attachShader(Shader* shader){
 	GLchar errorLog[1024] = { 0 };
 
 	glAttachShader(this->shaderProgram, shader->getShaderID());
+
+	glLinkProgram(this->shaderProgram);
 	glGetProgramiv(this->shaderProgram, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE) { //Link program false
 		glGetProgramInfoLog(this->shaderProgram, sizeof(errorLog), NULL, errorLog);
@@ -102,10 +90,6 @@ void Program::useProgram(bool usage){
 	}
 }
 
-GLuint Program::getUniformLocation(std::string uniform){
-	return glGetUniformLocation(this->shaderProgram, uniform.data());
-}
-
-GLuint Program::getAttributeLocation(std::string attribute){
-	return glGetAttribLocation(this->shaderProgram, attribute.data());
+GLuint Program::getProgram() const{
+	return this->shaderProgram;
 }

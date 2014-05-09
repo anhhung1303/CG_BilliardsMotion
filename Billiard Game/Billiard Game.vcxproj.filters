@@ -20,26 +20,16 @@
       <UniqueIdentifier>{cf471a71-f036-44df-b0e3-fc5e68826168}</UniqueIdentifier>
       <Extensions>vert; frag; vs; fs; glsl</Extensions>
     </Filter>
+    <Filter Include="Test Files">
+      <UniqueIdentifier>{e70ca19e-017a-4bff-b92b-a0be8818ed96}</UniqueIdentifier>
+      <Extensions>inl</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resource\logo-dai-hoc-cong-nghe.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resource\TextureDemo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Main File</Filter>
-    </ClCompile>
     <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mesh.cpp">
@@ -54,15 +44,42 @@
     <ClCompile Include="model3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Main File</Filter>
+    </ClCompile>
+    <ClCompile Include="Constant.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="light.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vertex.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mesh.hpp">
@@ -77,5 +94,57 @@
     <ClInclude Include="model3D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="node.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vertex.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Constant.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shader\shader.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Resource\Shader\shader.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="test_mesh.inl">
+      <Filter>Test Files</Filter>
+    </None>
+    <None Include="test_binding.inl">
+      <Filter>Test Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Resource\resource.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resource\scene1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resource\listScene.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
