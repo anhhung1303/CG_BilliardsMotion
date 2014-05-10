@@ -1,7 +1,5 @@
 #include "Scene.hpp"
 
-#include "ResourceManager.hpp"
-
 Scene::Scene()
 {
 	objects = NULL;
@@ -28,31 +26,38 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	//Reading object
 	fscanf(inputFile, "#Objects: %d\n", &numOfObjects);
 	//cout << "Objects = " << numOfObjects << endl;
-	objects = new Object[numOfObjects];
+	objects = new Object * [numOfObjects];
 	for (int idObject = 0; idObject < numOfObjects; ++idObject){
 		int temp;
 		fscanf(inputFile, "ID %d\n", &temp);
+		char objectType[300];
+		fscanf(inputFile, "OBJECT_TYPE %s\n", objectType);
+		cout << "OBJECT_TYPE = " << objectType << endl;
+		if (strcmp(objectType, "BALL") == 0){
+			objects[idObject] = new Ball();
+		}
+		else {
+			objects[idObject] = new Object();
+		}
 		//Model
 		int idModel;
 		fscanf(inputFile, "MODEL %d\n", &idModel);
 		//cout << "MODEL = " << idModel << endl;
-		objects[idObject].loadModel(idModel, resourceManager);
-		
+		objects[idObject]->loadModel(idModel, resourceManager);		
 		//Shaders
 		int idShaders;
 		fscanf(inputFile, "SHADER %d\n", &idShaders);
 		//cout << "SHADER = " << idShaders << endl;
-		objects[idObject].loadProgram(idShaders, resourceManager);
-
+		objects[idObject]->loadProgram(idShaders, resourceManager);
 		//Object position, rotation, scale
 		float x, y, z;
 		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
-		objects[idObject].translate(x, y, z);
+		objects[idObject]->translate(x, y, z);
 		fscanf(inputFile, "ROTATION %f, %f, %f\n", &x, &y, &z);
 		//TODO
 		float scaleVal;
 		fscanf(inputFile, "SCALE %f\n", &scaleVal);
-		objects[idObject].scale(scaleVal);
+		objects[idObject]->scale(scaleVal);
 	}
 
 	//LIGHTS
@@ -100,7 +105,7 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 void Scene::render()
 {
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
-		objects[objectId].render(projectionMarix, &camera);
+		objects[objectId]->render(projectionMarix, &camera);
 	}
 }
 
@@ -109,7 +114,11 @@ void Scene::unload()
 {
 	if (objects != NULL){
 		for (int objectId = 0; objectId < numOfObjects; ++objectId){
-			objects[objectId].unload();
+			objects[objectId]->unload();
+			if (objects[objectId] != NULL){
+				delete objects[objectId];
+				objects[objectId] = NULL;
+			}
 		}
 		delete[] objects;
 		objects = NULL;

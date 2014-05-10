@@ -58,9 +58,18 @@ void Object::translate(float x, float y, float z){
 	model->translate(glm::vec3(x, y, z));
 }
 
-void Object::rotate(){
-	//TODO
+void Object::translate(glm::vec3 translateVector){
+	model->translate(translateVector);
 }
+
+void Object::rotate(float angle, float x, float y, float z){
+	model->rotate(angle, glm::vec3(x, y, z));
+}
+
+void Object::rotate(float angle, glm::vec3 rotateVector){
+	model->rotate(angle, rotateVector);
+}
+
 
 void Object::scale(float scaleVal){
 	model->scale(scaleVal);

@@ -2,6 +2,8 @@
 
 #include "ResourceManager.hpp"
 #include "Object.hpp"
+#include "Ball.hpp"
+
 class Scene
 {
 public:
@@ -15,8 +17,9 @@ public:
 	void unload();
 
 	Camera camera;
+	Object * * objects;//TODO set private
 private:
-	Object * objects;
+	
 	int numOfObjects;
 
 	glm::mat4 projectionMarix;

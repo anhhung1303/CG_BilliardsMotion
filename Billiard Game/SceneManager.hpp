@@ -15,8 +15,9 @@ public:
 	void renderScene(int sceneId);
 	// delete old data
 	void unload();
-	Scene * scenes;
+	Scene * getScene(int sceneId);
 private:
+	Scene * scenes;
 	//Scene * scenes;
 	int numOfScenes;
 };

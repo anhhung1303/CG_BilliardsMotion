@@ -10,7 +10,7 @@ public:
 	Object();
 	~Object();
 	// render the 3D object
-	void render(glm::mat4 projectionMarix, Camera * camera);
+	virtual void render(glm::mat4 projectionMarix, Camera * camera);
 	// load Model3D from resourceManager
 	void loadModel(int modelId, ResourceManager * resourceManager);
 	// load Program from resourceManager
@@ -18,7 +18,9 @@ public:
 	void unload();
 
 	void translate(float x, float y, float z);
-	void rotate();//TODO
+	void translate(glm::vec3 translateVector);
+	void rotate(float angle, float x, float y, float z);
+	void rotate(float angle, glm::vec3 rotateVector);
 	void scale(float x);
 private:
 	Model3D * model;

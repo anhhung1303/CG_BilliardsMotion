@@ -14,6 +14,7 @@
 #include "SceneManager.hpp"
 #include "ResourceManager.hpp"
 #include "Constant.hpp"
+#include "Ball.hpp"
 
 #include <gl/glew.h>
 
@@ -43,22 +44,26 @@ void init(int argc, char *argv[]){
 	printf("\tGLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 	printf("============================================================\n");
 
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	glFrontFace(GL_CCW);
-	glCullFace(GL_FRONT);
-	glEnable(GL_CULL_FACE);
+	glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+	//glFrontFace(GL_CCW);
+	//glCullFace(GL_FRONT);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GLUT_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 
 	resourceManager.load(Constant::RESOURCE_FILE);
 	sceneManager.load(Constant::SCENE_FILE, & resourceManager);
-	camera = & (sceneManager.scenes[0].camera);
+	camera = & (sceneManager.getScene(0)->camera);
 }
 
 void displayFunc(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	sceneManager.renderScene(0);
 	glutSwapBuffers();
+}
+
+void idleFunc(){
+	glutPostRedisplay();
 }
 
 void specialKeyFunc(int key, int x, int y){
@@ -116,6 +121,10 @@ void keyboardFunc(unsigned char key, int x, int y){
 	case 'x': case 'X':
 		camera->rotate(angle, zAxis);
 		break;
+	case 'o': case 'O':
+		Ball * ball = (Ball *) (sceneManager.getScene(0)->objects[1]);
+		ball->setVelocity(glm::vec3(0.01f, 0.0f, 0.01f));
+		break;
 	/*case '2':
 		model->translate(-yAxis * coef);
 		break;
@@ -143,12 +152,73 @@ void keyboardFunc(unsigned char key, int x, int y){
 	}
 	glutPostRedisplay();
 }
+
+int startX, startY;
+bool start = false;
+void processMouseButtons(int button, int state, int x, int y){
+	if (button == GLUT_LEFT_BUTTON){
+		cout << "Left ";
+	}
+	else if (button == GLUT_RIGHT_BUTTON){
+		cout << "Right ";
+	}
+	else if (button == GLUT_MIDDLE_BUTTON){
+		cout << "Middle ";
+	}
+	if (state == GLUT_DOWN){
+		cout << "Down ";
+	}
+	else if (state == GLUT_UP){
+		cout << "Up ";
+	}
+	cout << x << " " << y << endl;
+	if (button == GLUT_LEFT_BUTTON){
+		if (state == GLUT_DOWN){
+			start = true;
+			startX = x;
+			startY = y;
+		}
+		else if (state == GLUT_UP){
+			start = false;
+		}
+	}
+	glutPostRedisplay();
+}
+
+void processMouseMotion(int x, int y){
+	static float coef = -0.0005f;
+	if (start == true){
+		int deltaX = startX - x;
+		int deltaY = startY - y;
+		//cout << "Move " << deltaX << " " << deltaY << endl;
+		camera->translate(0.0f, -coef * deltaY, 0.0f);
+		camera->translate(coef * deltaX, 0.0f, 0.0f);
+		startX = x;
+		startY = y;
+	}
+	glutPostRedisplay();
+}
+
+void mouseWheel(int wheel, int direction, int x, int y) {
+	static float coef = -0.005f; //Coefficient must to be negative
+	if (direction > 0){
+		camera->translate(0.0f, 0.0f, -coef * 2);
+	}
+	else {
+		camera->translate(0.0f, 0.0f, coef * 2);
+	}
+	glutPostRedisplay();
+}
 int main(int argc, char *argv[]){
 	init(argc, argv);
 
 	glutDisplayFunc(displayFunc);
+	glutIdleFunc(idleFunc);
 	glutSpecialFunc(specialKeyFunc);
 	glutKeyboardFunc(keyboardFunc);
+	glutMouseFunc(processMouseButtons);
+	glutMotionFunc(processMouseMotion);
+	//glutMouseWheelFunc(mouseWheel);
 
 	glutMainLoop();
 

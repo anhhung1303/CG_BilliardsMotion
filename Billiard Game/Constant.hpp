@@ -8,4 +8,7 @@ public:
 	static const char * SHARE_PATH;
 	static const char  * SCENE_FILE;
 	static const char  * RESOURCE_FILE;
+
+	static const float FRICTIONAL_COEFFICIENT;
+	static const float TIME_FOR_A_FRAME;
 };
