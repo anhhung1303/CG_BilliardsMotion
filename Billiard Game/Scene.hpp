@@ -16,10 +16,16 @@ public:
 	// delete old data
 	void unload();
 
-	Camera camera;
+	Camera * getUsingCamera();
+	void setUsingCamera(int cameraId);
+	
 	Object * * objects;//TODO set private
 private:
-	
+	Camera * cameras;
+	int numOfCameras;
+	int usingCameraId;
+
+	//Object * * objects;
 	int numOfObjects;
 
 	glm::mat4 projectionMarix;

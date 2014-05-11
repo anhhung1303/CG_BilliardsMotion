@@ -83,21 +83,26 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	}
 
 	//CAMERA
-	fscanf(inputFile, "#CAMERA\n");
+	fscanf(inputFile, "#Camera: %d\n", &numOfCameras);
+	cameras = new Camera[numOfCameras];
+	for (int idCamera = 0; idCamera < numOfCameras; ++idCamera){
+		int temp;
+		fscanf(inputFile, "ID %d\n", &temp);
+		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
+		cameras[idCamera].push();
+		cameras[idCamera].translate(glm::vec3(x, y, z));
+		cout << "Camera position = " << x << " " << y << " " << z << endl;
 
-	fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
-	camera.push();
-	camera.translate(glm::vec3(x, y, z));
-	//cout << "Camera position = " << x << " " << y << " " << z << endl;
-
-	GLfloat zNear, zFar, fovy, aspect;
-	fscanf(inputFile, "NEAR %f\n", &zNear);
-	fscanf(inputFile, "FAR %f\n", &zFar);
-	fscanf(inputFile, "FOV %f\n", &fovy);
-	fscanf(inputFile, "ASPECT %f\n", &aspect);
-	projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);
-	//cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
-
+		GLfloat zNear, zFar, fovy, aspect;
+		fscanf(inputFile, "NEAR %f\n", &zNear);
+		fscanf(inputFile, "FAR %f\n", &zFar);
+		fscanf(inputFile, "FOV %f\n", &fovy);
+		fscanf(inputFile, "ASPECT %f\n", &aspect);
+		projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);
+		cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
+	}
+	
+	setUsingCamera(0);
 	fclose(inputFile);
 }
 
@@ -105,7 +110,7 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 void Scene::render()
 {
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
-		objects[objectId]->render(projectionMarix, &camera);
+		objects[objectId]->render(projectionMarix, getUsingCamera());
 	}
 }
 
@@ -123,5 +128,25 @@ void Scene::unload()
 		delete[] objects;
 		objects = NULL;
 		numOfObjects = 0;
+		delete[] cameras;
+		cameras = NULL;
+		numOfCameras = 0;
+	}
+}
+
+Camera * Scene::getUsingCamera(){
+	if (cameras == NULL || usingCameraId >= numOfCameras){
+		cerr << "Get unknown camera " << endl;
+		return NULL;
+	}
+	return &(cameras[usingCameraId]);
+}
+
+void Scene::setUsingCamera(int usingCameraId){
+	if (usingCameraId < numOfCameras && usingCameraId >= 0){
+		this->usingCameraId = usingCameraId;
+	}
+	else {
+		cerr << "set using unknown camera " << endl;
 	}
 }

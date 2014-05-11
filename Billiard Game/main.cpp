@@ -53,7 +53,7 @@ void init(int argc, char *argv[]){
 
 	resourceManager.load(Constant::RESOURCE_FILE);
 	sceneManager.load(Constant::SCENE_FILE, & resourceManager);
-	camera = & (sceneManager.getScene(0)->camera);
+	camera = sceneManager.getScene(0)->getUsingCamera();
 }
 
 void displayFunc(){
@@ -121,34 +121,17 @@ void keyboardFunc(unsigned char key, int x, int y){
 	case 'x': case 'X':
 		camera->rotate(angle, zAxis);
 		break;
+	case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
+		sceneManager.getScene(0)->setUsingCamera(key - '0');
+		camera = sceneManager.getScene(0)->getUsingCamera();
+		break;
+	//TODO delete this case
 	case 'o': case 'O':
-		Ball * ball = (Ball *) (sceneManager.getScene(0)->objects[1]);
-		ball->setVelocity(glm::vec3(0.01f, 0.0f, 0.01f));
+		Ball * ball = (Ball *)(sceneManager.getScene(0)->objects[1]);
+		ball->setVelocity(glm::vec3(0.02f, 0.0f, 0.02f));
 		break;
-	/*case '2':
-		model->translate(-yAxis * coef);
-		break;
-	case '4':
-		model->translate(-xAxis * coef);
-		break;
-	case '6':
-		model->translate(xAxis * coef);
-		break;
-	case '8':
-		model->translate(yAxis * coef);
-		break;
-	case '5':
-		model->translate(-zAxis * coef);
-		break;
-	case '0':
-		model->translate(zAxis * coef);
-		break;
-	case '1':
-		model->rotate(-angle, yAxis * coef);
-		break;
-	case '3':
-		model->rotate(angle, yAxis * coef);
-		break;*/
+	//default:
+	//	break;
 	}
 	glutPostRedisplay();
 }
