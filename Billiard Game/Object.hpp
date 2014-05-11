@@ -22,8 +22,13 @@ public:
 	void rotate(float angle, float x, float y, float z);
 	void rotate(float angle, glm::vec3 rotateVector);
 	void scale(float x);
+
+	void setAnchorPoint();
+	glm::vec3 getPosition();
 private:
 	Model3D * model;
 	Program * program;
+
+	glm::vec3 position;
 };
 

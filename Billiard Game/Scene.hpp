@@ -20,6 +20,7 @@ public:
 	void setUsingCamera(int cameraId);
 	
 	Object * * objects;//TODO set private
+	glm::mat4 projectionMarix;//TODO back to private or move to Camera
 private:
 	Camera * cameras;
 	int numOfCameras;
@@ -28,6 +29,6 @@ private:
 	//Object * * objects;
 	int numOfObjects;
 
-	glm::mat4 projectionMarix;
+	
 };
 

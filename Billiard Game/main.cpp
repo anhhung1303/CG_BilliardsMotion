@@ -121,7 +121,7 @@ void keyboardFunc(unsigned char key, int x, int y){
 	case 'x': case 'X':
 		camera->rotate(angle, zAxis);
 		break;
-	case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
+	case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 		sceneManager.getScene(0)->setUsingCamera(key - '0');
 		camera = sceneManager.getScene(0)->getUsingCamera();
 		break;
@@ -137,7 +137,9 @@ void keyboardFunc(unsigned char key, int x, int y){
 }
 
 int startX, startY;
-bool start = false;
+bool startLeft = false;
+bool startRight = false;
+glm::vec4 getRay(float mousex, float mousey);
 void processMouseButtons(int button, int state, int x, int y){
 	if (button == GLUT_LEFT_BUTTON){
 		cout << "Left ";
@@ -157,20 +159,71 @@ void processMouseButtons(int button, int state, int x, int y){
 	cout << x << " " << y << endl;
 	if (button == GLUT_LEFT_BUTTON){
 		if (state == GLUT_DOWN){
-			start = true;
+			startLeft = true;
 			startX = x;
 			startY = y;
 		}
 		else if (state == GLUT_UP){
-			start = false;
+			startLeft = false;
 		}
 	}
+	else if (button == GLUT_RIGHT_BUTTON){
+		if (state == GLUT_DOWN){
+			startRight = true;
+			startX = x;
+			startY = y;
+		}
+		else if (state == GLUT_UP){
+			startRight = false;
+
+			glm::vec4 cameraInWorld = glm::inverse(camera->getViewMatrix()) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			
+			glm::vec4 firstRay = getRay(startX, startY);
+			cout << "firstRay = " << firstRay.x << " " << firstRay.y << " " << firstRay.z << " " << firstRay.t << " " << endl;
+			firstRay.x = firstRay.x / firstRay.y * -cameraInWorld.y;
+			firstRay.z = firstRay.z / firstRay.y * -cameraInWorld.y;
+			firstRay.y = -cameraInWorld.y;
+
+			glm::vec4 secondRay = getRay(x, y);
+			cout << "secondRay = " << secondRay.x << " " << secondRay.y << " " << secondRay.z << " " << secondRay.t << " " << endl;
+			secondRay.x = secondRay.x / secondRay.y * -cameraInWorld.y;
+			secondRay.z = secondRay.z / secondRay.y * -cameraInWorld.y;
+			secondRay.y = -cameraInWorld.y;
+
+			glm::vec3 velocity = glm::vec3(secondRay.x - firstRay.x, secondRay.y - firstRay.y, secondRay.z - firstRay.z);
+			velocity = glm::normalize(velocity);
+			cout << "velocity = " << velocity.x << " " << velocity.y << " " << velocity.z << " " << velocity.t << " " << endl;
+			cout << "length = " << glm::length(velocity) << endl;
+			
+			Ball * ball = (Ball *)(sceneManager.getScene(0)->objects[1]);
+			ball->setVelocity(glm::vec3(velocity.x * 0.02f, 0.0f, velocity.z * 0.02f));
+		}
+	}
+
 	glutPostRedisplay();
+}
+
+glm::vec4 getRay(float mouse_x, float mouse_y){
+	float x = (2.0f * mouse_x) / Constant::SCREEN_WIDTH - 1.0f;
+	float y = 1.0f - (2.0f * mouse_y) / Constant::SCREEN_HEIGHT;
+	float z = 1.0f;
+	glm::vec3 ray_nds = glm::vec3(x, y, z);
+
+	glm::vec4 ray_clip = glm::vec4(ray_nds.x, ray_nds.y, -1.0f, 1.0f);
+
+	glm::vec4 ray_eye = glm::inverse(sceneManager.getScene(0)->projectionMarix) * ray_clip;
+
+	ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+	glm::vec4 ray_world4 = glm::inverse(camera->getViewMatrix()) * ray_eye;
+	glm::vec3 result = glm::vec3(ray_world4.x, ray_world4.y, ray_world4.z);
+	// don't forget to normalise the vector at some point
+	result = glm::normalize(result);
+	return glm::vec4(result.x, result.y, result.z, 0.0f);
 }
 
 void processMouseMotion(int x, int y){
 	static float coef = -0.0005f;
-	if (start == true){
+	if (startLeft == true){
 		int deltaX = startX - x;
 		int deltaY = startY - y;
 		//cout << "Move " << deltaX << " " << deltaY << endl;

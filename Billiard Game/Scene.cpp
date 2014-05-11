@@ -58,6 +58,8 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		float scaleVal;
 		fscanf(inputFile, "SCALE %f\n", &scaleVal);
 		objects[idObject]->scale(scaleVal);
+
+		objects[idObject]->setAnchorPoint();//set coordinate for the ball
 	}
 
 	//LIGHTS
@@ -98,7 +100,7 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		fscanf(inputFile, "FAR %f\n", &zFar);
 		fscanf(inputFile, "FOV %f\n", &fovy);
 		fscanf(inputFile, "ASPECT %f\n", &aspect);
-		projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);
+		projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);//TODO
 		cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
 	}
 	

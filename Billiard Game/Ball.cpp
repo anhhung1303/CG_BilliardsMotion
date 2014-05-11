@@ -8,7 +8,6 @@ Ball::Ball()
 }
 
 
-
 Ball::~Ball()
 {
 	Object::~Object();
@@ -28,7 +27,7 @@ void Ball::render(glm::mat4 projectionMarix, Camera * camera)
 		this->rotate(angle, rotateAxis);*/
 
 		if (glm::length(this->velocity) != 0){
-			cout << "Current time = " << currentTime << " lastTime = " << this->timeLastFrame << " " << Constant::TIME_FOR_A_FRAME << endl;
+			//cout << "Current time = " << currentTime << " lastTime = " << this->timeLastFrame << " " << Constant::TIME_FOR_A_FRAME << endl;
 			if (glm::length(this->velocity) <= glm::length(this->acceleration)){
 				setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 			}
