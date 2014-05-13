@@ -18,11 +18,12 @@ void Texture::clear(){
 }
 
 bool Texture::loadTexture(const std::string& path){
+#ifdef PRINT_LOADING
+	fprintf(stdout, "Loading texture : \"%s\" ...\n", path.data());
+#endif
 	if (!fileIsExist(path)){
-		fprintf(stderr, "File \"%s\" not Found!\n", path.data());
+		fprintf(stderr, "File not Found!\n");
 		exit(EXIT_FAILURE);
-	} else {
-		fprintf(stdout, "Loading texture \"%s\"\n", path.data());
 	}
 
 	ilInit();
@@ -58,6 +59,11 @@ bool Texture::loadTexture(const std::string& path){
 	glBindTexture(GL_TEXTURE_2D, NULL);
 
 	ilDeleteImage(imageID);
+
+#ifdef PRINT_LOADING
+	fprintf(stdout, "Loading texture DONE.\n");
+	fprintf(stdout, "____________________________________________________________\n");
+#endif
 	return true;
 }
 

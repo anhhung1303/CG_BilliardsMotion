@@ -30,6 +30,9 @@ void Model3D::clear(){
 bool Model3D::loadModel(const std::string& path){
 	clear();
 
+#ifdef PRINT_LOADING
+	fprintf(stdout, "Loading model   : \"%s\" ...\n", path.data());
+#endif
 	if (!fileIsExist(path)){
 		printf("File not fount.\n");
 		exit(EXIT_FAILURE);
@@ -38,21 +41,23 @@ bool Model3D::loadModel(const std::string& path){
 	static Assimp::Importer imp;
 	const aiScene* scene = imp.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
 	if (scene == NULL){
-		fprintf(stderr, "Error parsing '%s': '%s'\n", path, imp.GetErrorString());
+		fprintf(stderr, "Error : '%s'\n", imp.GetErrorString());
 		exit(EXIT_FAILURE);
-	} else {
-		fprintf(stdout, "Loading model \"%s\" done.\n", path.data());
 	}
+
+#ifdef PRINT_LOADING
+	fprintf(stdout, "Loading model DONE.\n");
+	fprintf(stdout, "____________________________________________________________\n");
+#endif
 
 	importMaterials(scene);
 	importTextures(scene, path);
 	importMeshes(scene);
 	importNodes(scene);
 
-	printf("Mesh %d\n", meshes.size());
-	printf("Material %d\n", materials.size());
-	printf("Texture %d\n", textures.size());
-
+	printf("Mesh     : %d\n", meshes.size());
+	printf("Material : %d\n", materials.size());
+	printf("Texture  : %d\n", textures.size());
 	return true;
 }
 
@@ -96,7 +101,7 @@ void Model3D::importTextures(const aiScene* scene, const std::string& path){
 
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++){
 		aiMaterial* aiMat = scene->mMaterials[i];
-		
+
 		if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &file) == aiReturn_SUCCESS){
 			Texture* tex = new Texture();
 			tex->loadTexture(dir + "/" + file.data);
@@ -144,8 +149,8 @@ void Model3D::scale(glm::vec3 scaleFactor){
 	root->modelMatrix = glm::scale(scaleFactor) * root->modelMatrix;
 }
 
-void Model3D::render(const glm::mat4& preMatrix){
-	draw(root, preMatrix);
+void Model3D::render(){
+	draw(root, idMat4);
 }
 
 void Model3D::draw(const Node* node, const glm::mat4& preMatrix){
@@ -154,7 +159,7 @@ void Model3D::draw(const Node* node, const glm::mat4& preMatrix){
 	}
 
 	glm::mat4 curMatrix = preMatrix * node->modelMatrix;
-	glUniformMatrix4fv(Node::uMVPMatrixLoc, 1, GL_FALSE, glm::value_ptr(curMatrix));
+	glUniformMatrix4fv(Node::uModelMatrixLoc, 1, GL_FALSE, glm::value_ptr(curMatrix));
 
 	for (const Mesh* mes : node->content){
 		const Material* mat = mes->getMaterial();
@@ -162,7 +167,10 @@ void Model3D::draw(const Node* node, const glm::mat4& preMatrix){
 
 		if (mat != NULL){
 			glBindBufferRange(GL_UNIFORM_BUFFER, Material::uboMaterialLoc,
-				mat->getUBOMaterial(), 0, sizeof(MaterialBlock));
+				mat->getUBOMaterial(), 0, sizeof(LightMaterial));
+#ifdef PRINT_LIGHT_MATERIAL
+			std::cout << *(mat->uMaterial) << std::endl;
+#endif
 		}
 		if (tex != NULL){
 			glActiveTexture(GL_TEXTURE0);
@@ -172,7 +180,7 @@ void Model3D::draw(const Node* node, const glm::mat4& preMatrix){
 			glUniform1i(Texture::uTextureCountLoc, NULL);
 		}
 
-		glBindVertexArray(mes->getVAO());	
+		glBindVertexArray(mes->getVAO());
 		glDrawElements(GL_TRIANGLES, mes->getNumIndices(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(NULL);
 
@@ -180,7 +188,7 @@ void Model3D::draw(const Node* node, const glm::mat4& preMatrix){
 			glBindTexture(GL_TEXTURE_2D, NULL);
 		}
 	}
-	
+
 	for (const Node* child : node->children){
 		draw(child, curMatrix);
 	}

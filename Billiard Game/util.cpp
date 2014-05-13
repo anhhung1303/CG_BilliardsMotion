@@ -135,3 +135,48 @@ std::ostream& operator<<(std::ostream& os, const aiMatrix4x4& matrix){
 	}
 	return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const glm::vec3& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2];
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const glm::vec4& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2] << ", " << vector[3];
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const aiVector3D& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2];
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const aiColor4D& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2] << ", " << vector[3];
+	return os;
+}
+
+#include "material.hpp"
+std::ostream& operator<<(std::ostream& os, const LightMaterial& met){
+	os << "Material:\n";
+	os << "   + ambient:\t" << met.ambient << std::endl;
+	os << "   + diffuse:\t" << met.diffuse << std::endl;
+	os << "   + specular:\t" << met.specular << std::endl;
+	os << "   + shininess:\t" << met.shininess << std::endl;
+	os << "   + emissive:\t" << met.emissive << std::endl;
+	return os;
+}
+
+#include "light.hpp"
+std::ostream& operator<<(std::ostream& os, const LightSource& ls){
+	os << "Light:\n";
+	os << "   - ambient:\t" << ls.ambientIntensity << std::endl;
+	os << "   - diffuse:\t" << ls.diffuseIntensity << std::endl;
+	os << "   - specular:\t" << ls.specularIntensity << std::endl;
+	os << "   - position:\t" << ls.position << std::endl;
+	os << "   - attenuation:\n";
+	os << "      + Constant:\t" << ls.attenuationConstant << std::endl;
+	os << "      + Linear:\t" << ls.attenuationLinear << std::endl;
+	os << "      + Quadratic:\t" << ls.attenuationQuadratic << std::endl;
+	return os;
+}

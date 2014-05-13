@@ -59,6 +59,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Main File</Filter>
     </ClCompile>
+    <ClCompile Include="test_lighting.inl">
+      <Filter>Test Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp">
@@ -93,17 +96,23 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shader\shader.frag">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Resource\Shader\shader.vert">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="test_mesh.inl">
       <Filter>Test Files</Filter>
     </None>
     <None Include="test_binding.inl">
       <Filter>Test Files</Filter>
+    </None>
+    <None Include="Resource\Shader\test.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Resource\Shader\test.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Resource\Shader\basic_light.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Resource\Shader\basic_light.vert">
+      <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
 </Project>

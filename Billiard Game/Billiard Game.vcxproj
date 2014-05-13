@@ -76,6 +76,7 @@
     <ClCompile Include="model3D.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="test_lighting.inl" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vertex.cpp" />
@@ -93,8 +94,10 @@
     <ClInclude Include="vertex.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shader\shader.frag" />
-    <None Include="Resource\Shader\shader.vert" />
+    <None Include="Resource\Shader\basic_light.frag" />
+    <None Include="Resource\Shader\basic_light.vert" />
+    <None Include="Resource\Shader\test.frag" />
+    <None Include="Resource\Shader\test.vert" />
     <None Include="test_binding.inl" />
     <None Include="test_mesh.inl" />
   </ItemGroup>

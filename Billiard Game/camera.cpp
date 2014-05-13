@@ -1,5 +1,8 @@
 #include "camera.hpp"
 
+GLuint Camera::uViewMatrixLoc = 2;
+GLuint Camera::uViewPosLoc = 3;
+
 Camera::Camera(const glm::mat4& viewMatrix){
 	clear();
 	setViewMatrix(viewMatrix);
@@ -21,6 +24,10 @@ const glm::mat4& Camera::getViewMatrix() const{
 	return (*cur);
 }
 
+glm::vec3 Camera::getViewPosition() const{
+	return glm::vec3(glm::inverse(*cur) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+}
+
 void Camera::translate(const glm::vec3& distance){
 	*cur = glm::translate(distance) * (*cur);
 }
@@ -29,8 +36,8 @@ void Camera::translate(float dx, float dy, float dz){
 	translate(glm::vec3(dx, dy, dz));
 }
 
-void Camera::rotate(float angle, const glm::vec3& direction){
-	*cur = glm::rotate(angle, direction) * (*cur);
+void Camera::rotate(float angle, const glm::vec3& orientation){
+	*cur = glm::rotate(angle, orientation) * (*cur);
 }
 
 void Camera::rotate(float angle, float ox, float oy, float oz){

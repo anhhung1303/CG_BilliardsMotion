@@ -9,31 +9,34 @@
 #pragma comment(lib, "assimp.lib")
 #endif
 
-#include <iostream>
-
 #include <gl/glew.h>
 #include <gl/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 #include "camera.hpp"
 #include "shader.hpp"
 #include "model3D.hpp"
+#include "light.hpp"
+#include "util.hpp"
 
 using namespace std;
 
-#define VERTEX_SHADER_FILE		"./Resource/Shader/shader.vert"
-#define FRAGMENT_SHADER_FILE	"./Resource/Shader/shader.frag"
-#define MODEL_FILE				"./Resource/Model/Table_billiard N220610.3DS"
+#define VERTEX_SHADER_FILE		"./Resource/Shader/basic_light.vert"
+#define FRAGMENT_SHADER_FILE	"./Resource/Shader/basic_light.frag"
+#define MODEL_FILE				"./Resource/Model/box.3ds"
 #define TEXTURE_FILE			"./Resource/Model/TextureDemo.png"
 
 glm::mat4 projectionMarix; //in scene
+GLuint uProjMatrixLoc = 1;
 Camera * camera;
 Program * program;
 Model3D * model;
 Texture * texture;
+Light * light;
 
 int width = 800, height = 600;
 float fovy = 45.0f; //The field of view angle, in degrees
@@ -46,6 +49,7 @@ void initData();
 void specialKeyFunc(int key, int x, int y);
 void keyboardFunc(unsigned char key, int x, int y);
 void displayFunc();
+void drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step);
 
 int main(int argc, char *argv[]){
 	initGL(argc, argv);
@@ -75,13 +79,19 @@ void initGL(int argc, char *argv[]){
 	printf("\tRenderer: %s\n", glGetString(GL_RENDERER));
 	printf("\tGL Version: %s\n", glGetString(GL_VERSION));
 	printf("\tGLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	printf("============================================================\n");
+	printf("===========================================================\n");
 
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glFrontFace(GL_CCW);
-	glCullFace(GL_FRONT);
+	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
-	glEnable(GLUT_MULTISAMPLE);
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_POLYGON_OFFSET_LINE);
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -90,23 +100,39 @@ void initData(){
 	GLuint p = program->getProgram();
 	program->attachShader(new Shader(VERTEX_SHADER_FILE, GL_VERTEX_SHADER));
 	program->attachShader(new Shader(FRAGMENT_SHADER_FILE, GL_FRAGMENT_SHADER));
-	program->useProgram(true);
+	Program::useProgram(program);
 
-	Node::uMVPMatrixLoc = glGetUniformLocation(p, "uMVPMatrix");
 	Mesh::aPositionLoc = glGetAttribLocation(p, "position");
 	Mesh::aTexCoordLoc = glGetAttribLocation(p, "texCoord");
 	Mesh::aNormalLoc = glGetAttribLocation(p, "normal");
-	Texture::uTextureCountLoc = glGetUniformLocation(p, "texCount");
+
+	Node::uModelMatrixLoc = glGetUniformLocation(p, "modelMatrix");
+	Camera::uViewMatrixLoc = glGetUniformLocation(p, "viewMatrix");
+	uProjMatrixLoc = glGetUniformLocation(p, "projMatrix");
+
 	Material::uboMaterialLoc = glGetUniformBlockIndex(p, "Material");
+	Light::uboLightLoc = glGetUniformBlockIndex(p, "Light");
+	Texture::uTextureCountLoc = glGetUniformLocation(p, "texCount");
+	Camera::uViewPosLoc = glGetUniformLocation(p, "viewPos");
+	program->printActiveUniform();
 
 	projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);
 	camera = new Camera();
-	camera->push();
 	camera->translate(glm::vec3(0.0f, 0.0f, -0.34f));
+	camera->push();
+
+	LightSource ls;
+	ls.position = glm::vec3(5.0f, 5.0f, 5.0f);
+	ls.ambientIntensity = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
+	//ls.diffuseIntensity = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
+	ls.specularIntensity = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+
+	light = new Light();
+	light->setLightSource(&ls);
 
 	model = new Model3D();
 	model->loadModel(MODEL_FILE);
-	model->scale(0.0001f);
+	model->scale(0.01f);
 }
 
 void specialKeyFunc(int key, int x, int y){
@@ -195,8 +221,69 @@ void keyboardFunc(unsigned char key, int x, int y){
 void displayFunc(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	program->useProgram(true);
-	model->render(projectionMarix * camera->getViewMatrix());
+	Program::useProgram(NULL);
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(glm::value_ptr(projectionMarix));
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(glm::value_ptr(camera->getViewMatrix()));
+	drawGroundGrid(0.0f, 0.0f, 50.0f, 50.0f, 0.1f);
+
+	Program::useProgram(program);
+	glUniformMatrix4fv(Camera::uViewMatrixLoc, 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+	glUniformMatrix4fv(uProjMatrixLoc, 1, GL_FALSE, glm::value_ptr(projectionMarix));
+
+	glm::vec3 viewPos = camera->getViewPosition();
+	glUniform3f(Camera::uViewPosLoc, viewPos.x, viewPos.y, viewPos.z);
+#ifdef PRINT_CAMERA_POSITION
+	cout << "Camera Pos:\t" << viewPos << endl;
+#endif
+
+	if (light != NULL){
+		glBindBufferRange(GL_UNIFORM_BUFFER, Light::uboLightLoc,
+			light->getUBOLight(), 0, sizeof(LightMaterial));
+#ifdef PRINT_LIGHT_SOURCE
+		cout << *(light->uLight) << endl;
+#endif
+	}
+
+	model->render();
 
 	glutSwapBuffers();
+}
+
+void drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step){
+	glBegin(GL_LINES);
+
+	glColor3f(1.0f, 0.0f, 0.0f); //Read Color - Z - axis
+	//glVertex3f(0.0f, 0.0f, centerZ - rangeZ);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, centerZ + rangeZ);
+
+	glColor3f(0.0f, 1.0f, 0.0f); //Blue Color - X axis
+	//glVertex3f(centerX - rangeX, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(centerX + rangeX, 0.0f, 0.0f);
+
+	glColor3f(0.0f, 0.0f, 0.0f); //Black Color
+	for (float line = 0; line < rangeX; line += step){
+		if (centerX + line != 0){
+			glVertex3f(centerX + line, 0.0f, centerZ - rangeZ);
+			glVertex3f(centerX + line, 0.0f, centerZ + rangeZ);
+		}
+		if (centerX - line != 0){
+			glVertex3f(centerX - line, 0.0f, centerZ - rangeZ);
+			glVertex3f(centerX - line, 0.0f, centerZ + rangeZ);
+		}
+	}
+	for (float line = 0; line < rangeZ; line += step){
+		if (centerZ + line != 0){
+			glVertex3f(centerX - rangeX, 0.0f, centerZ + line);
+			glVertex3f(centerX + rangeX, 0.0f, centerZ + line);
+		}
+		if (centerZ - line != 0){
+			glVertex3f(centerX - rangeX, 0.0f, centerZ - line);
+			glVertex3f(centerX + rangeX, 0.0f, centerZ - line);
+		}
+	}
+	glEnd();
 }
