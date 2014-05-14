@@ -13,13 +13,16 @@
 #include <assert.h>
 #include <sys/stat.h>
 
-//#define PRINT_LOADING
+#define PRINT_LOADING
 //#define PRINT_LIGHT_SOURCE
 //#define PRINT_LIGHT_MATERIAL
 //#define PRINT_CAMERA_POSITION
 
 //Return variable name of var
 #define VAR_NAME(var) #var
+#define PARSING_DIRECTORY		0x1
+#define PARSING_FILE_NAME		0x2
+#define PARSING_FILE_EXTENSION	0x4
 
 const static glm::vec3 xAxis(1.0f, 0.0f, 0.0f);
 const static glm::vec3 yAxis(0.0f, 1.0f, 0.0f);
@@ -36,7 +39,7 @@ std::string getSource(const std::string& path);
 
 glm::mat4 convertToGLM(const aiMatrix4x4& mat);
 
-std::string parsingDirectory(const std::string& path);
+std::string parsingURL(const std::string& path, int urlPasingMode);
 
 void displayAISceneInfo(const aiScene* scene);
 

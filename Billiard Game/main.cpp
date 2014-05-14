@@ -27,7 +27,7 @@ using namespace std;
 
 #define VERTEX_SHADER_FILE		"./Resource/Shader/basic_light.vert"
 #define FRAGMENT_SHADER_FILE	"./Resource/Shader/basic_light.frag"
-#define MODEL_FILE				"./Resource/Model/box.3ds"
+#define MODEL_FILE				"./Resource/Model/TournamentTable.lwo"
 #define TEXTURE_FILE			"./Resource/Model/TextureDemo.png"
 
 glm::mat4 projectionMarix; //in scene
@@ -50,6 +50,7 @@ void specialKeyFunc(int key, int x, int y);
 void keyboardFunc(unsigned char key, int x, int y);
 void displayFunc();
 void drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step);
+
 
 int main(int argc, char *argv[]){
 	initGL(argc, argv);
@@ -82,9 +83,9 @@ void initGL(int argc, char *argv[]){
 	printf("===========================================================\n");
 
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
+	//glFrontFace(GL_CCW);
+	//glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glEnable(GL_POINT_SMOOTH);
@@ -123,16 +124,16 @@ void initData(){
 
 	LightSource ls;
 	ls.position = glm::vec3(5.0f, 5.0f, 5.0f);
-	ls.ambientIntensity = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
+	//ls.ambientIntensity = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
 	//ls.diffuseIntensity = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
-	ls.specularIntensity = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+	//ls.specularIntensity = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
 
 	light = new Light();
 	light->setLightSource(&ls);
 
 	model = new Model3D();
 	model->loadModel(MODEL_FILE);
-	model->scale(0.01f);
+	model->scale(0.1f);
 }
 
 void specialKeyFunc(int key, int x, int y){

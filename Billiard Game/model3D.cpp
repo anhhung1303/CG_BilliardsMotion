@@ -90,13 +90,11 @@ void Model3D::importMaterials(const aiScene* scene){
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++){
 		Material* mat = new Material();
 		mat->setMaterial(scene->mMaterials[i]);
-
 		materials.push_back(mat);
 	}
 }
 
 void Model3D::importTextures(const aiScene* scene, const std::string& path){
-	std::string dir = parsingDirectory(path);
 	aiString file;
 
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++){
@@ -104,9 +102,26 @@ void Model3D::importTextures(const aiScene* scene, const std::string& path){
 
 		if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &file) == aiReturn_SUCCESS){
 			Texture* tex = new Texture();
-			tex->loadTexture(dir + "/" + file.data);
-
-			textures[file.data] = tex;
+			
+			if (tex->loadTexture(parsingURL(path, PARSING_DIRECTORY) + "/" +
+				parsingURL(file.data, PARSING_DIRECTORY | PARSING_FILE_NAME | PARSING_FILE_EXTENSION))){
+				textures[file.data] = tex;
+				continue;
+			}
+			if (tex->loadTexture(parsingURL(path, PARSING_DIRECTORY | PARSING_FILE_NAME) + "/" +
+				parsingURL(file.data, PARSING_FILE_NAME | PARSING_FILE_EXTENSION))){
+				textures[file.data] = tex;
+				continue;
+			}
+			if (tex->loadTexture(parsingURL(path, PARSING_DIRECTORY) + "/" +
+				parsingURL(file.data, PARSING_FILE_NAME | PARSING_FILE_EXTENSION))){
+				textures[file.data] = tex;
+				continue;
+			}
+#ifdef PRINT_LOADING
+			fprintf(stdout, "CAN'T find any matching texture file.\n");
+			fprintf(stdout, "____________________________________________________________\n");
+#endif
 		}
 	}
 }

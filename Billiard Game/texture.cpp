@@ -23,7 +23,7 @@ bool Texture::loadTexture(const std::string& path){
 #endif
 	if (!fileIsExist(path)){
 		fprintf(stderr, "File not Found!\n");
-		exit(EXIT_FAILURE);
+		return false;
 	}
 
 	ilInit();
