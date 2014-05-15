@@ -1,8 +1,5 @@
 #include "Object.hpp"
 
-#include "shader.hpp"
-#include "model3D.hpp"
-#include "ResourceManager.hpp"
 
 Object::Object()
 {
@@ -15,13 +12,21 @@ Object::~Object()
 
 
 // render the 3D object
-void Object::render(glm::mat4 projectionMarix, Camera * camera)
+void Object::render(Camera * camera, Light * light)
 {
-	program->useProgram(true);
-	model->render(projectionMarix * camera->getViewMatrix());
-	//cout << model << endl;
-	//cout << projectionMarix << endl;
-	//cout << camera->getViewMatrix() << endl;
+	Program::useProgram(program);
+	glUniformMatrix4fv(Camera::uViewMatrixLoc, 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+	glUniformMatrix4fv(Camera::uProjMatrixLoc, 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+
+	glm::vec3 viewPos = camera->getViewPosition();
+	glUniform3f(Camera::uViewPosLoc, viewPos.x, viewPos.y, viewPos.z);
+
+	if (light != NULL){
+		glBindBufferRange(GL_UNIFORM_BUFFER, Light::uboLightLoc,
+			light->getUBOLight(), 0, sizeof(LightMaterial));
+	}
+
+	model->render();
 }
 
 
@@ -37,16 +42,22 @@ void Object::loadProgram(int programId, ResourceManager * resourceManager)
 {
 	program = resourceManager->getProgram(programId);
 
+	Program::useProgram(program);
 	GLuint p = program->getProgram();
-	//cout << "Program id when render = " << p << endl;
 
-	Node::uMVPMatrixLoc = glGetUniformLocation(p, "uMVPMatrix");
 	Mesh::aPositionLoc = glGetAttribLocation(p, "position");
 	Mesh::aTexCoordLoc = glGetAttribLocation(p, "texCoord");
 	Mesh::aNormalLoc = glGetAttribLocation(p, "normal");
-	Texture::uTextureCountLoc = glGetUniformLocation(p, "texCount");
+
+	Node::uModelMatrixLoc = glGetUniformLocation(p, "modelMatrix");
+	Camera::uViewMatrixLoc = glGetUniformLocation(p, "viewMatrix");
+	Camera::uProjMatrixLoc = glGetUniformLocation(p, "projMatrix");
+
 	Material::uboMaterialLoc = glGetUniformBlockIndex(p, "Material");
-	//cout << Node::uMVPMatrixLoc << " " << Mesh::aPositionLoc << " " << Mesh::aTexCoordLoc << " " << Mesh::aNormalLoc << " " << Texture::uTextureCountLoc << " " << Material::uboMaterialLoc << endl;
+	Light::uboLightLoc = glGetUniformBlockIndex(p, "Light");
+	Texture::uTextureCountLoc = glGetUniformLocation(p, "texCount");
+	Camera::uViewPosLoc = glGetUniformLocation(p, "viewPos");
+	//program->printActiveUniform();
 }
 
 
@@ -56,12 +67,30 @@ void Object::unload()
 
 void Object::translate(float x, float y, float z){
 	model->translate(glm::vec3(x, y, z));
+	modelMatrix = glm::translate(glm::vec3(x, y, z)) * modelMatrix;
 }
 
-void Object::rotate(){
-	//TODO
+void Object::translate(glm::vec3 translateVector){
+	model->translate(translateVector);
+	modelMatrix = glm::translate(translateVector) * modelMatrix;
 }
+
+void Object::rotate(float angle, float x, float y, float z){
+	model->rotate(angle, glm::vec3(x, y, z));
+	modelMatrix = glm::rotate(angle, glm::vec3(x, y, z)) * modelMatrix;
+}
+
+void Object::rotate(float angle, glm::vec3 rotateVector){
+	model->rotate(angle, rotateVector);
+	modelMatrix = glm::rotate(angle, rotateVector) * modelMatrix;
+}
+
 
 void Object::scale(float scaleVal){
 	model->scale(scaleVal);
+	modelMatrix = glm::scale(glm::vec3(scaleVal)) * modelMatrix;
+}
+
+glm::mat4 Object::getModelMatrix() const{
+	return modelMatrix;
 }

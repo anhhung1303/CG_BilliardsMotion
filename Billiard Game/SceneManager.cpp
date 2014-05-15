@@ -55,3 +55,7 @@ void SceneManager::unload()
 		scenes = NULL;
 	}
 }
+
+Scene * SceneManager::getScene(int sceneId){
+	return &(scenes[sceneId]);
+}

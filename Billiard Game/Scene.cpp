@@ -1,11 +1,15 @@
 #include "Scene.hpp"
 
-#include "ResourceManager.hpp"
-
 Scene::Scene()
 {
 	objects = NULL;
 	numOfObjects = 0;
+
+	cameras = NULL;
+	numOfCameras = 0;
+
+	lights = NULL;
+	numOfLights = 0;
 }
 
 
@@ -28,31 +32,39 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	//Reading object
 	fscanf(inputFile, "#Objects: %d\n", &numOfObjects);
 	//cout << "Objects = " << numOfObjects << endl;
-	objects = new Object[numOfObjects];
+	objects = new Object * [numOfObjects];
 	for (int idObject = 0; idObject < numOfObjects; ++idObject){
 		int temp;
 		fscanf(inputFile, "ID %d\n", &temp);
+		char objectType[300];
+		fscanf(inputFile, "OBJECT_TYPE %s\n", objectType);
+		cout << "OBJECT_TYPE = " << objectType << endl;
+		if (strcmp(objectType, "BALL") == 0){
+			objects[idObject] = new Ball();
+		}
+		else {
+			objects[idObject] = new Object();
+		}
 		//Model
 		int idModel;
 		fscanf(inputFile, "MODEL %d\n", &idModel);
 		//cout << "MODEL = " << idModel << endl;
-		objects[idObject].loadModel(idModel, resourceManager);
-		
+		objects[idObject]->loadModel(idModel, resourceManager);		
 		//Shaders
 		int idShaders;
 		fscanf(inputFile, "SHADER %d\n", &idShaders);
 		//cout << "SHADER = " << idShaders << endl;
-		objects[idObject].loadProgram(idShaders, resourceManager);
-
+		objects[idObject]->loadProgram(idShaders, resourceManager);
 		//Object position, rotation, scale
-		float x, y, z;
-		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
-		objects[idObject].translate(x, y, z);
-		fscanf(inputFile, "ROTATION %f, %f, %f\n", &x, &y, &z);
-		//TODO
 		float scaleVal;
 		fscanf(inputFile, "SCALE %f\n", &scaleVal);
-		objects[idObject].scale(scaleVal);
+		objects[idObject]->scale(scaleVal);
+		float x, y, z;
+		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
+		objects[idObject]->translate(x, y, z);
+		fscanf(inputFile, "ROTATION %f, %f, %f\n", &x, &y, &z);
+		//TODO
+
 	}
 
 	//LIGHTS
@@ -62,10 +74,14 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	fscanf(inputFile, "AmbientWeight %f\n", &x);
 	int numOfLights;
 	fscanf(inputFile, "LightsCount %d\n", &numOfLights);
+	lights = new Light[numOfLights];
 	for (int idLight = 0; idLight < numOfLights; ++idLight){
 		int temp;
 		fscanf(inputFile, "ID %d\n", &temp);
 		fscanf(inputFile, "POS/DIR %f, %f, %f\n", &x, &y, &z);
+		LightSource * lightSource = new LightSource();
+		lightSource->position = glm::vec3(x, y, z);
+		lights[idLight].setLightSource(lightSource);
 		char type[10];
 		fscanf(inputFile, "TYPE %s\n", type);
 		fscanf(inputFile, "COLOR %f, %f, %f\n", &x, &y, &z);
@@ -78,29 +94,42 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	}
 
 	//CAMERA
-	fscanf(inputFile, "#CAMERA\n");
+	fscanf(inputFile, "#Camera: %d\n", &numOfCameras);
+	cameras = new Camera[numOfCameras];
+	for (int idCamera = 0; idCamera < numOfCameras; ++idCamera){
+		int temp;
+		fscanf(inputFile, "ID %d\n", &temp);
+		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
+		cameras[idCamera].push();
+		cameras[idCamera].translate(glm::vec3(x, y, z));
+		//cout << "Camera position = " << x << " " << y << " " << z << endl;
 
-	fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
-	camera.push();
-	camera.translate(glm::vec3(x, y, z));
-	//cout << "Camera position = " << x << " " << y << " " << z << endl;
-
-	GLfloat zNear, zFar, fovy, aspect;
-	fscanf(inputFile, "NEAR %f\n", &zNear);
-	fscanf(inputFile, "FAR %f\n", &zFar);
-	fscanf(inputFile, "FOV %f\n", &fovy);
-	fscanf(inputFile, "ASPECT %f\n", &aspect);
-	projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);
-	//cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
-
+		GLfloat zNear, zFar, fovy, aspect;
+		fscanf(inputFile, "NEAR %f\n", &zNear);
+		fscanf(inputFile, "FAR %f\n", &zFar);
+		fscanf(inputFile, "FOV %f\n", &fovy);
+		fscanf(inputFile, "ASPECT %f\n", &aspect);
+		cameras[idCamera].setProjectionMatrix(glm::perspective(fovy, aspect, zNear, zFar));
+		//cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
+	}
+	
+	setUsingCamera(0);
 	fclose(inputFile);
 }
 
 // render 3D scene
 void Scene::render()
 {
+	Program::useProgram(NULL);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(glm::value_ptr(getUsingCamera()->getProjectionMatrix()));
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(glm::value_ptr(getUsingCamera()->getViewMatrix()));
+	drawGroundGrid(0.0f, 0.0f, 50.0f, 50.0f, 0.1f);
+
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
-		objects[objectId].render(projectionMarix, &camera);
+		objects[objectId]->render(getUsingCamera(), &lights[0]);
 	}
 }
 
@@ -109,10 +138,79 @@ void Scene::unload()
 {
 	if (objects != NULL){
 		for (int objectId = 0; objectId < numOfObjects; ++objectId){
-			objects[objectId].unload();
+			objects[objectId]->unload();
+			if (objects[objectId] != NULL){
+				delete objects[objectId];
+				objects[objectId] = NULL;
+			}
 		}
 		delete[] objects;
 		objects = NULL;
 		numOfObjects = 0;
 	}
+	if (cameras != NULL){
+		delete[] cameras;
+		cameras = NULL;
+		numOfCameras = 0;
+	}
+	if (lights != NULL){
+		delete[] lights;
+		lights = NULL;
+		numOfLights = 0;
+	}
 }
+
+Camera * Scene::getUsingCamera(){
+	if (cameras == NULL || usingCameraId >= numOfCameras){
+		cerr << "Get unknown camera " << endl;
+		return NULL;
+	}
+	return &(cameras[usingCameraId]);
+}
+
+void Scene::setUsingCamera(int usingCameraId){
+	if (usingCameraId < numOfCameras && usingCameraId >= 0){
+		this->usingCameraId = usingCameraId;
+	}
+	else {
+		cerr << "set using unknown camera " << endl;
+	}
+}
+
+void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step){
+	glBegin(GL_LINES);
+
+	glColor3f(1.0f, 0.0f, 0.0f); //Read Color - Z - axis
+	//glVertex3f(0.0f, 0.0f, centerZ - rangeZ);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, centerZ + rangeZ);
+
+	glColor3f(0.0f, 1.0f, 0.0f); //Blue Color - X axis
+	//glVertex3f(centerX - rangeX, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(centerX + rangeX, 0.0f, 0.0f);
+
+	glColor3f(0.0f, 0.0f, 0.0f); //Black Color
+	for (float line = 0; line < rangeX; line += step){
+		if (centerX + line != 0){
+			glVertex3f(centerX + line, 0.0f, centerZ - rangeZ);
+			glVertex3f(centerX + line, 0.0f, centerZ + rangeZ);
+		}
+		if (centerX - line != 0){
+			glVertex3f(centerX - line, 0.0f, centerZ - rangeZ);
+			glVertex3f(centerX - line, 0.0f, centerZ + rangeZ);
+		}
+	}
+	for (float line = 0; line < rangeZ; line += step){
+		if (centerZ + line != 0){
+			glVertex3f(centerX - rangeX, 0.0f, centerZ + line);
+			glVertex3f(centerX + rangeX, 0.0f, centerZ + line);
+		}
+		if (centerZ - line != 0){
+			glVertex3f(centerX - rangeX, 0.0f, centerZ - line);
+			glVertex3f(centerX + rangeX, 0.0f, centerZ - line);
+		}
+	}
+	glEnd();
+}
+

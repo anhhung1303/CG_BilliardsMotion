@@ -1,6 +1,6 @@
 #include "node.hpp"
 
-GLuint Node::uMVPMatrixLoc = 1;
+GLuint Node::uModelMatrixLoc = 3;
 
 Node::Node(){
 	parent = NULL;

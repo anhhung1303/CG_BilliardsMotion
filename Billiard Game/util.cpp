@@ -32,12 +32,52 @@ glm::mat4 convertToGLM(const aiMatrix4x4& mat){
 	return m;
 }
 
-std::string parsingDirectory(const std::string& path){
+std::string parsingURL(const std::string& path, int urlPasingMode){
 	std::string::size_type slashIndex = path.find_last_of("/\\");
-	if (slashIndex == std::string::npos){
-		return "";
+
+	//Checking that dot is separator extension or not
+	auto checkExtensionDot = [&](std::string::size_type dotIndex)->bool{
+		int first = dotIndex, last = dotIndex;
+		while (int(first) >= 0 && path[first] == '.') first--;
+		while (int(last) < path.length() && path[last] == '.') last++;
+
+		int flag = 0;
+		if ((first < 0) || (path[first] == '\\') || (path[first] == '/')) flag++;
+		if ((last >= path.length()) || (path[last] == '\\') || (path[last] == '/')) flag++;
+		return flag != 2;
+	};
+
+	std::string::size_type dotIndex = path.find_last_of(".");
+	if (!checkExtensionDot(dotIndex)) dotIndex = std::string::npos;
+
+	std::string dir = (dotIndex == std::string::npos) ? path :
+		((slashIndex == std::string::npos) ? "" : path.substr(0, slashIndex));
+	if ((!dir.empty()) && ((dir.front() == '\\') || (dir.front() == '/'))){
+		dir.erase(0, 1);
 	}
-	return path.substr(0, slashIndex);
+
+	std::string ext = (dotIndex == std::string::npos) ? "" : path.substr(dotIndex + 1);
+	std::string file_name = path.substr(dir.length(), path.length() - ext.length() - dir.length());
+	if ((!file_name.empty()) && ((file_name.front() == '\\') || (file_name.front() == '/'))){
+		file_name.erase(0, 1);
+	}
+	if ((!file_name.empty()) && (file_name.back() == '.')){
+		file_name.erase(file_name.length() - 1);
+	}
+
+	std::string result = "";
+	if ((urlPasingMode & PARSING_DIRECTORY) != 0x0){
+		result += dir;
+	}
+	if ((urlPasingMode & PARSING_FILE_NAME) != 0x0){
+		if (!result.empty()) result += '/';
+		result += file_name;
+	}
+	if ((urlPasingMode & PARSING_FILE_EXTENSION) != 0x0){
+		if (!result.empty()) result += '.'; 
+		result += ext;
+	}
+	return result;
 }
 
 void displayAISceneInfo(const aiScene* scene){
@@ -133,5 +173,50 @@ std::ostream& operator<<(std::ostream& os, const aiMatrix4x4& matrix){
 		}
 		os << std::endl;
 	}
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const glm::vec3& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2];
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const glm::vec4& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2] << ", " << vector[3];
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const aiVector3D& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2];
+	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const aiColor4D& vector){
+	os << vector[0] << ", " << vector[1] << ", " << vector[2] << ", " << vector[3];
+	return os;
+}
+
+#include "material.hpp"
+std::ostream& operator<<(std::ostream& os, const LightMaterial& met){
+	os << "Material:\n";
+	os << "   + ambient:\t" << met.ambient << std::endl;
+	os << "   + diffuse:\t" << met.diffuse << std::endl;
+	os << "   + specular:\t" << met.specular << std::endl;
+	os << "   + shininess:\t" << met.shininess << std::endl;
+	os << "   + emissive:\t" << met.emissive << std::endl;
+	return os;
+}
+
+#include "light.hpp"
+std::ostream& operator<<(std::ostream& os, const LightSource& ls){
+	os << "Light:\n";
+	os << "   - ambient:\t" << ls.ambientIntensity << std::endl;
+	os << "   - diffuse:\t" << ls.diffuseIntensity << std::endl;
+	os << "   - specular:\t" << ls.specularIntensity << std::endl;
+	os << "   - position:\t" << ls.position << std::endl;
+	os << "   - attenuation:\n";
+	os << "      + Constant:\t" << ls.attenuationConstant << std::endl;
+	os << "      + Linear:\t" << ls.attenuationLinear << std::endl;
+	os << "      + Quadratic:\t" << ls.attenuationQuadratic << std::endl;
 	return os;
 }
