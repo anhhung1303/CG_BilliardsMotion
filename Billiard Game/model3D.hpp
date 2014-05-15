@@ -1,9 +1,5 @@
 #pragma once
 
-#include <map>
-#include <vector>
-#include <string>
-
 #include <gl/glew.h>
 #include <gl/freeglut.h>
 #include <assimp/Importer.hpp>
@@ -12,6 +8,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
+
+#include <map>
+#include <vector>
+#include <string>
 
 #include "mesh.hpp"
 #include "material.hpp"
@@ -34,7 +34,7 @@ public:
 	bool loadModel(const std::string& path);
 	void clear();
 
-	void render(const glm::mat4& preMatrix);
+	void render();
 
 	void translate(glm::vec3 distance);
 	void rotate(float angle, glm::vec3 axis);

@@ -4,6 +4,12 @@ Scene::Scene()
 {
 	objects = NULL;
 	numOfObjects = 0;
+
+	cameras = NULL;
+	numOfCameras = 0;
+
+	lights = NULL;
+	numOfLights = 0;
 }
 
 
@@ -50,16 +56,15 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		//cout << "SHADER = " << idShaders << endl;
 		objects[idObject]->loadProgram(idShaders, resourceManager);
 		//Object position, rotation, scale
+		float scaleVal;
+		fscanf(inputFile, "SCALE %f\n", &scaleVal);
+		objects[idObject]->scale(scaleVal);
 		float x, y, z;
 		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
 		objects[idObject]->translate(x, y, z);
 		fscanf(inputFile, "ROTATION %f, %f, %f\n", &x, &y, &z);
 		//TODO
-		float scaleVal;
-		fscanf(inputFile, "SCALE %f\n", &scaleVal);
-		objects[idObject]->scale(scaleVal);
 
-		objects[idObject]->setAnchorPoint();//set coordinate for the ball
 	}
 
 	//LIGHTS
@@ -69,10 +74,14 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	fscanf(inputFile, "AmbientWeight %f\n", &x);
 	int numOfLights;
 	fscanf(inputFile, "LightsCount %d\n", &numOfLights);
+	lights = new Light[numOfLights];
 	for (int idLight = 0; idLight < numOfLights; ++idLight){
 		int temp;
 		fscanf(inputFile, "ID %d\n", &temp);
 		fscanf(inputFile, "POS/DIR %f, %f, %f\n", &x, &y, &z);
+		LightSource * lightSource = new LightSource();
+		lightSource->position = glm::vec3(x, y, z);
+		lights[idLight].setLightSource(lightSource);
 		char type[10];
 		fscanf(inputFile, "TYPE %s\n", type);
 		fscanf(inputFile, "COLOR %f, %f, %f\n", &x, &y, &z);
@@ -93,15 +102,15 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
 		cameras[idCamera].push();
 		cameras[idCamera].translate(glm::vec3(x, y, z));
-		cout << "Camera position = " << x << " " << y << " " << z << endl;
+		//cout << "Camera position = " << x << " " << y << " " << z << endl;
 
 		GLfloat zNear, zFar, fovy, aspect;
 		fscanf(inputFile, "NEAR %f\n", &zNear);
 		fscanf(inputFile, "FAR %f\n", &zFar);
 		fscanf(inputFile, "FOV %f\n", &fovy);
 		fscanf(inputFile, "ASPECT %f\n", &aspect);
-		projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);//TODO
-		cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
+		cameras[idCamera].setProjectionMatrix(glm::perspective(fovy, aspect, zNear, zFar));
+		//cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
 	}
 	
 	setUsingCamera(0);
@@ -111,8 +120,16 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 // render 3D scene
 void Scene::render()
 {
+	Program::useProgram(NULL);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(glm::value_ptr(getUsingCamera()->getProjectionMatrix()));
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(glm::value_ptr(getUsingCamera()->getViewMatrix()));
+	drawGroundGrid(0.0f, 0.0f, 50.0f, 50.0f, 0.1f);
+
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
-		objects[objectId]->render(projectionMarix, getUsingCamera());
+		objects[objectId]->render(getUsingCamera(), &lights[0]);
 	}
 }
 
@@ -130,9 +147,16 @@ void Scene::unload()
 		delete[] objects;
 		objects = NULL;
 		numOfObjects = 0;
+	}
+	if (cameras != NULL){
 		delete[] cameras;
 		cameras = NULL;
 		numOfCameras = 0;
+	}
+	if (lights != NULL){
+		delete[] lights;
+		lights = NULL;
+		numOfLights = 0;
 	}
 }
 
@@ -152,3 +176,41 @@ void Scene::setUsingCamera(int usingCameraId){
 		cerr << "set using unknown camera " << endl;
 	}
 }
+
+void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step){
+	glBegin(GL_LINES);
+
+	glColor3f(1.0f, 0.0f, 0.0f); //Read Color - Z - axis
+	//glVertex3f(0.0f, 0.0f, centerZ - rangeZ);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, centerZ + rangeZ);
+
+	glColor3f(0.0f, 1.0f, 0.0f); //Blue Color - X axis
+	//glVertex3f(centerX - rangeX, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(centerX + rangeX, 0.0f, 0.0f);
+
+	glColor3f(0.0f, 0.0f, 0.0f); //Black Color
+	for (float line = 0; line < rangeX; line += step){
+		if (centerX + line != 0){
+			glVertex3f(centerX + line, 0.0f, centerZ - rangeZ);
+			glVertex3f(centerX + line, 0.0f, centerZ + rangeZ);
+		}
+		if (centerX - line != 0){
+			glVertex3f(centerX - line, 0.0f, centerZ - rangeZ);
+			glVertex3f(centerX - line, 0.0f, centerZ + rangeZ);
+		}
+	}
+	for (float line = 0; line < rangeZ; line += step){
+		if (centerZ + line != 0){
+			glVertex3f(centerX - rangeX, 0.0f, centerZ + line);
+			glVertex3f(centerX + rangeX, 0.0f, centerZ + line);
+		}
+		if (centerZ - line != 0){
+			glVertex3f(centerX - rangeX, 0.0f, centerZ - line);
+			glVertex3f(centerX + rangeX, 0.0f, centerZ - line);
+		}
+	}
+	glEnd();
+}
+

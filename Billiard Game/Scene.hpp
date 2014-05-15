@@ -20,11 +20,14 @@ public:
 	void setUsingCamera(int cameraId);
 	
 	Object * * objects;//TODO set private
-	glm::mat4 projectionMarix;//TODO back to private or move to Camera
+	void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step);
 private:
 	Camera * cameras;
 	int numOfCameras;
 	int usingCameraId;
+
+	Light * lights;
+	int numOfLights;
 
 	//Object * * objects;
 	int numOfObjects;

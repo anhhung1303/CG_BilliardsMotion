@@ -12,7 +12,6 @@ Mesh::~Mesh(){
 	clear(CLEAR_MESH | CLEAR_MATERIAL | CLEAR_TEXTURE);
 }
 
-#include "test_mesh.inl"
 void Mesh::setMesh(const aiMesh* mesh){
 	clear(CLEAR_MESH);
 	GLuint buffer;
@@ -40,6 +39,7 @@ void Mesh::setMesh(const aiMesh* mesh){
 	faceArray = new unsigned int[this->numIndices];
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace* face = &mesh->mFaces[i];
+		assert(face->mNumIndices == 3); //If mNumIndices != 3, program rase error
 		memcpy(&faceArray[3 * i], face->mIndices, 3 * sizeof(unsigned int));
 	}
 	glGenBuffers(1, &buffer);

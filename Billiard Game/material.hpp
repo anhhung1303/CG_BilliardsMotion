@@ -5,17 +5,20 @@
 #include <assimp/scene.h>
 #include <glm/glm.hpp>
 
-struct MaterialBlock{
+struct LightMaterial{
 	glm::vec4 ambient;
 	glm::vec4 diffuse;
 	glm::vec4 specular;
-	glm::vec4 emissive;
 	float shininess;
+	glm::vec4 emissive;
+
+	LightMaterial();
 };
 
 class Material{
-private:
-	MaterialBlock uMaterial;
+public:
+//private:
+	LightMaterial* uMaterial;
 
 	//Uniform Buffer Object of Material
 	GLuint uboMaterial;

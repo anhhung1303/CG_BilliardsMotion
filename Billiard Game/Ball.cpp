@@ -13,7 +13,7 @@ Ball::~Ball()
 	Object::~Object();
 }
 
-void Ball::render(glm::mat4 projectionMarix, Camera * camera)
+void Ball::render(glm::mat4 projectionMarix, Camera * camera, Light * light)
 {
 	GLdouble currentTime = glutGet(GLUT_ELAPSED_TIME);
 	if (currentTime - this->timeLastFrame > Constant::TIME_FOR_A_FRAME){
@@ -36,7 +36,7 @@ void Ball::render(glm::mat4 projectionMarix, Camera * camera)
 			}
 		}
 	}
-	Object::render(projectionMarix, camera);
+	Object::render(camera, light);
 }
 
 

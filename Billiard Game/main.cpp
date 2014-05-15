@@ -9,6 +9,14 @@
 #pragma comment(lib, "assimp.lib")
 #endif
 
+#include <gl/glew.h>
+#include <gl/freeglut.h>
+#include <glm/glm.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
+
 #include "camera.hpp"
 #include "vertex.hpp"
 #include "SceneManager.hpp"
@@ -16,9 +24,6 @@
 #include "Constant.hpp"
 #include "Ball.hpp"
 
-#include <gl/glew.h>
-
-#include <iostream>
 
 using namespace std;
 
@@ -42,13 +47,19 @@ void init(int argc, char *argv[]){
 	printf("\tRenderer: %s\n", glGetString(GL_RENDERER));
 	printf("\tGL Version: %s\n", glGetString(GL_VERSION));
 	printf("\tGLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	printf("============================================================\n");
+	printf("===========================================================\n");
 
-	glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	//glFrontFace(GL_CCW);
-	//glCullFace(GL_FRONT);
+	//glCullFace(GL_BACK);
 	//glEnable(GL_CULL_FACE);
-	glEnable(GLUT_MULTISAMPLE);
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_POLYGON_OFFSET_LINE);
 	glEnable(GL_DEPTH_TEST);
 
 	resourceManager.load(Constant::RESOURCE_FILE);
@@ -58,6 +69,7 @@ void init(int argc, char *argv[]){
 
 void displayFunc(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	sceneManager.renderScene(0);
 	glutSwapBuffers();
 }
@@ -211,7 +223,7 @@ glm::vec4 getRay(float mouse_x, float mouse_y){
 
 	glm::vec4 ray_clip = glm::vec4(ray_nds.x, ray_nds.y, -1.0f, 1.0f);
 
-	glm::vec4 ray_eye = glm::inverse(sceneManager.getScene(0)->projectionMarix) * ray_clip;
+	glm::vec4 ray_eye = glm::inverse(camera->getProjectionMatrix()) * ray_clip;
 
 	ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
 	glm::vec4 ray_world4 = glm::inverse(camera->getViewMatrix()) * ray_eye;
@@ -245,6 +257,7 @@ void mouseWheel(int wheel, int direction, int x, int y) {
 	}
 	glutPostRedisplay();
 }
+
 int main(int argc, char *argv[]){
 	init(argc, argv);
 
@@ -260,5 +273,6 @@ int main(int argc, char *argv[]){
 
 	sceneManager.unload();
 	resourceManager.unload();
+
 	return 0;
 }

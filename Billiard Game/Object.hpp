@@ -3,6 +3,8 @@
 #include "model3D.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
+#include "light.hpp"
+#include "Constant.hpp"
 
 class Object
 {
@@ -10,7 +12,7 @@ public:
 	Object();
 	~Object();
 	// render the 3D object
-	virtual void render(glm::mat4 projectionMarix, Camera * camera);
+	virtual void render(Camera * camera, Light * light);
 	// load Model3D from resourceManager
 	void loadModel(int modelId, ResourceManager * resourceManager);
 	// load Program from resourceManager
@@ -23,12 +25,11 @@ public:
 	void rotate(float angle, glm::vec3 rotateVector);
 	void scale(float x);
 
-	void setAnchorPoint();
-	glm::vec3 getPosition();
+	glm::mat4 getModelMatrix() const;
 private:
 	Model3D * model;
 	Program * program;
 
-	glm::vec3 position;
+	glm::mat4 modelMatrix;
 };
 

@@ -9,7 +9,7 @@ public:
 	Ball();
 	~Ball();
 
-	virtual void render(glm::mat4 projectionMarix, Camera * camera);
+	virtual void render(glm::mat4 projectionMarix, Camera * camera, Light * light);
 	// apply new velocity to ball
 	void setVelocity(glm::vec3 velocity);
 	// get velocity of the ball

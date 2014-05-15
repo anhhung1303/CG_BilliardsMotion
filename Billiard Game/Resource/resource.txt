@@ -1,11 +1,10 @@
 #Models: 2
 ID 0
-FILE "./Resource/Model/Balls/table.obj"
-
+FILE "./Resource/Model/TournamentTable.lwo"
 ID 1
-FILE "./Resource/Model/Balls/ball1.obj"
+FILE "./Resource/Model/Balls/Ball_1.obj"
 
 #Shaders: 1
 ID 0
-VS "./Resource/Shader/shader.vert"
-FS "./Resource/Shader/shader.frag"
+VS "./Resource/Shader/basic_light.vert"
+FS "./Resource/Shader/basic_light.frag"

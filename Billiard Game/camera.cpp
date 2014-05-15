@@ -1,5 +1,9 @@
 #include "camera.hpp"
 
+GLuint Camera::uViewMatrixLoc = 2;
+GLuint Camera::uViewPosLoc = 3;
+GLuint Camera::uProjMatrixLoc = -1;
+
 Camera::Camera(const glm::mat4& viewMatrix){
 	clear();
 	setViewMatrix(viewMatrix);
@@ -17,8 +21,20 @@ void Camera::lookAt(const glm::vec3& eye, const glm::vec3& target, const glm::ve
 	setViewMatrix(glm::lookAt(eye, target, up));
 }
 
+glm::mat4 Camera::getProjectionMatrix(){
+	return projectionMatrix;
+}
+
+void Camera::setProjectionMatrix(glm::mat4 newProjectionMatrix){
+	projectionMatrix = newProjectionMatrix;
+}
+
 const glm::mat4& Camera::getViewMatrix() const{
 	return (*cur);
+}
+
+glm::vec3 Camera::getViewPosition() const{
+	return glm::vec3(glm::inverse(*cur) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 void Camera::translate(const glm::vec3& distance){
@@ -29,8 +45,8 @@ void Camera::translate(float dx, float dy, float dz){
 	translate(glm::vec3(dx, dy, dz));
 }
 
-void Camera::rotate(float angle, const glm::vec3& direction){
-	*cur = glm::rotate(angle, direction) * (*cur);
+void Camera::rotate(float angle, const glm::vec3& orientation){
+	*cur = glm::rotate(angle, orientation) * (*cur);
 }
 
 void Camera::rotate(float angle, float ox, float oy, float oz){

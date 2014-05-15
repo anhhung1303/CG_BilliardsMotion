@@ -2,8 +2,17 @@
 
 GLuint Material::uboMaterialLoc = 1;
 
+LightMaterial::LightMaterial(){
+	ambient = glm::vec4(0.2, 0.2, 0.2, 1.0);
+	diffuse = glm::vec4(0.8, 0.8, 0.8, 1.0);
+	specular = glm::vec4(0.0, 0.0, 0.0, 1.0);
+	shininess = 0.0f;
+	emissive = glm::vec4(0.0, 0.0, 0.0, 1.0);
+}
+
 Material::Material(){
-	clear();
+	//clear();
+	uMaterial = new LightMaterial();
 }
 
 Material::~Material(){
@@ -12,35 +21,42 @@ Material::~Material(){
 
 void Material::clear(){
 	glDeleteBuffers(1, &uboMaterial);
+	if (uMaterial != NULL){
+		delete uMaterial;
+		uMaterial = NULL;
+	}
 }
 
 bool Material::setMaterial(const aiMaterial* material){
+	clear();
+
+	this->uMaterial = new LightMaterial();
 	aiColor4D color;
 
-	uMaterial.ambient = (material->Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) ?
-		glm::vec4(color.r, color.g, color.b, color.a) :
-		glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+	if (material->Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS){
+		uMaterial->ambient = glm::vec4(color.r, color.g, color.b, color.a);
+	}
 
-	uMaterial.diffuse = (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) ?
-		glm::vec4(color.r, color.g, color.b, color.a) :
-		glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS){
+		uMaterial->diffuse = glm::vec4(color.r, color.g, color.b, color.a);
+	}
 
-	uMaterial.specular = (material->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS) ?
-		glm::vec4(color.r, color.g, color.b, color.a) :
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (material->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS){
+		uMaterial->specular = glm::vec4(color.r, color.g, color.b, color.a);
+	}
 
-	uMaterial.emissive = (material->Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS) ?
-		glm::vec4(color.r, color.g, color.b, color.a) :
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (material->Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS){
+		uMaterial->emissive = glm::vec4(color.r, color.g, color.b, color.a);
+	}
 
-	uMaterial.shininess = 0.0;
+	uMaterial->shininess = 0.0;
 	unsigned int max;
-	aiGetMaterialFloatArray(material, AI_MATKEY_SHININESS, &uMaterial.shininess, &max);
+	aiGetMaterialFloatArray(material, AI_MATKEY_SHININESS, &(uMaterial->shininess), &max);
 
 	glGenBuffers(1, &uboMaterial);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMaterial);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(MaterialBlock), (void*)(&uMaterial), GL_STATIC_DRAW);
-	glBindBufferRange(GL_UNIFORM_BUFFER, uboMaterialLoc, uboMaterial, 0, sizeof(MaterialBlock));
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(LightMaterial), (void*) uMaterial, GL_STATIC_DRAW);
+	//glBindBufferRange(GL_UNIFORM_BUFFER, uboMaterialLoc, uboMaterial, 0, sizeof(LightMaterial));
 	glBindBuffer(GL_UNIFORM_BUFFER, NULL);
 
 	return true;

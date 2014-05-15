@@ -1,5 +1,8 @@
 #pragma once
 
+#include <gl/glew.h>
+#include <gl/freeglut.h>
+
 class Constant {
 public:
 	static const int SCREEN_WIDTH = 800;

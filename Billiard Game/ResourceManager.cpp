@@ -25,11 +25,13 @@ void ResourceManager::load(const char * resourceFilePath)
 	//Reading model
 	fscanf(inputFile, "#Models: %d\n", &numOfModels);
 	models = new Model3D[numOfModels];
+	cout << numOfModels << " ";
 	for (int idModel = 0; idModel < numOfModels; ++idModel){
 		int temp;
 		fscanf(inputFile, "ID %d\n", &temp);
 		char fileModel[300];
 		fscanf(inputFile, "FILE \"%[^\"]\"\n", fileModel);
+		//cout << "File name: " << fileModel << endl;
 		models[idModel].loadModel(fileModel);
 	}
 
@@ -42,9 +44,9 @@ void ResourceManager::load(const char * resourceFilePath)
 		char fileVertexShader[300], fileFragmentShader[300];
 		fscanf(inputFile, "VS \"%[^\"]\"\n", fileVertexShader);
 		fscanf(inputFile, "FS \"%[^\"]\"\n", fileFragmentShader);
+		cerr << "Shader = " << fileVertexShader << " " << fileFragmentShader;
 		programs[idShaders].attachShader(new Shader(fileVertexShader, GL_VERTEX_SHADER));
 		programs[idShaders].attachShader(new Shader(fileFragmentShader, GL_FRAGMENT_SHADER));
-		programs[idShaders].useProgram(true);
 	}
 	fclose(inputFile);
 }
