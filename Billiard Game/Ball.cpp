@@ -5,6 +5,7 @@ Ball::Ball()
 {
 	Object::Object();
 	this->timeLastFrame = 0.0;
+	radius = 5.7;
 }
 
 
@@ -13,11 +14,10 @@ Ball::~Ball()
 	Object::~Object();
 }
 
-void Ball::render(glm::mat4 projectionMarix, Camera * camera, Light * light)
+void Ball::render(Camera * camera, Light * light, GLdouble elapsedTime)
 {
-	GLdouble currentTime = glutGet(GLUT_ELAPSED_TIME);
-	if (currentTime - this->timeLastFrame > Constant::TIME_FOR_A_FRAME){
-		float coef = (currentTime - this->timeLastFrame) / Constant::TIME_FOR_A_FRAME;
+	if (elapsedTime > Constant::TIME_FOR_A_FRAME){
+		float coef = elapsedTime / Constant::TIME_FOR_A_FRAME;
 		//cout << "Current time = " << currentTime << " lastTime = " << this->timeLastFrame << " " << Constant::TIME_FOR_A_FRAME << endl;
 		//cout << "Coef = " << coef << endl;
 		this->translate(velocity.x * coef, velocity.y * coef, velocity.z * coef);
@@ -36,7 +36,7 @@ void Ball::render(glm::mat4 projectionMarix, Camera * camera, Light * light)
 			}
 		}
 	}
-	Object::render(camera, light);
+	Object::render(camera, light, elapsedTime);
 }
 
 
@@ -68,4 +68,33 @@ void Ball::setRadius(float radius){
 }
 float Ball::getRadius(){
 	return this->radius;
+}
+
+void Ball::collideWith(Ball * otherBall){
+	float spring = 0.003;
+
+	glm::vec4 otherBallPositionInItsLocal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 otherBallInWorld = otherBall->getModelMatrix() * otherBallPositionInItsLocal;
+	glm::vec4 otherBallInBallLocal = glm::inverse(this->getModelMatrix()) * otherBallInWorld;
+
+	float dx = otherBallInBallLocal.x;
+	float dz = otherBallInBallLocal.z;
+	float distance = sqrt(dx*dx + dz*dz);
+	float minDist = 2 * this->getRadius();
+	//cout << "distance = " << distance << endl;
+	//cout << "minDist = " << minDist << endl;
+	if (distance < minDist) {
+		float angle = atan2(dz, dx);
+		cout << "Angle = " << angle << endl;
+		float targetX = cos(angle) * minDist;
+		float targetZ = sin(angle) * minDist;
+		cout << "targetX = " << targetX << " targetZ = " << targetZ << endl;
+		float ax = (targetX - otherBallInBallLocal.x) * spring;
+		float az = (targetZ - otherBallInBallLocal.z) * spring;
+		cout << "ax = " << ax << " az = " << az << endl;
+		this->setVelocity(glm::vec3(this->velocity.x - ax, 0.0f, this->velocity.z - az));
+		otherBall->setVelocity(glm::vec3(otherBall->velocity.x + ax, 0.0f, otherBall->velocity.z + az));
+
+		cout << "Collision detected" << endl;
+	}
 }

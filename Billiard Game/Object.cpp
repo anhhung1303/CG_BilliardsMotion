@@ -12,9 +12,25 @@ Object::~Object()
 
 
 // render the 3D object
-void Object::render(Camera * camera, Light * light)
+void Object::render(Camera * camera, Light * light, GLdouble elapsedTime)
 {
 	Program::useProgram(program);
+
+	GLuint p = program->getProgram();
+
+	Mesh::aPositionLoc = glGetAttribLocation(p, "position");
+	Mesh::aTexCoordLoc = glGetAttribLocation(p, "texCoord");
+	Mesh::aNormalLoc = glGetAttribLocation(p, "normal");
+
+	Node::uModelMatrixLoc = glGetUniformLocation(p, "modelMatrix");
+	Camera::uViewMatrixLoc = glGetUniformLocation(p, "viewMatrix");
+	Camera::uProjMatrixLoc = glGetUniformLocation(p, "projMatrix");
+
+	Material::uboMaterialLoc = glGetUniformBlockIndex(p, "Material");
+	Light::uboLightLoc = glGetUniformBlockIndex(p, "Light");
+	Texture::uTextureCountLoc = glGetUniformLocation(p, "texCount");
+	Camera::uViewPosLoc = glGetUniformLocation(p, "viewPos");
+
 	glUniformMatrix4fv(Camera::uViewMatrixLoc, 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
 	glUniformMatrix4fv(Camera::uProjMatrixLoc, 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
 
@@ -43,20 +59,7 @@ void Object::loadProgram(int programId, ResourceManager * resourceManager)
 	program = resourceManager->getProgram(programId);
 
 	Program::useProgram(program);
-	GLuint p = program->getProgram();
 
-	Mesh::aPositionLoc = glGetAttribLocation(p, "position");
-	Mesh::aTexCoordLoc = glGetAttribLocation(p, "texCoord");
-	Mesh::aNormalLoc = glGetAttribLocation(p, "normal");
-
-	Node::uModelMatrixLoc = glGetUniformLocation(p, "modelMatrix");
-	Camera::uViewMatrixLoc = glGetUniformLocation(p, "viewMatrix");
-	Camera::uProjMatrixLoc = glGetUniformLocation(p, "projMatrix");
-
-	Material::uboMaterialLoc = glGetUniformBlockIndex(p, "Material");
-	Light::uboLightLoc = glGetUniformBlockIndex(p, "Light");
-	Texture::uTextureCountLoc = glGetUniformLocation(p, "texCount");
-	Camera::uViewPosLoc = glGetUniformLocation(p, "viewPos");
 	//program->printActiveUniform();
 }
 

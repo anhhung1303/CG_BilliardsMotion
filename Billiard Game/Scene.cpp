@@ -10,6 +10,8 @@ Scene::Scene()
 
 	lights = NULL;
 	numOfLights = 0;
+
+	timeLastFrame = 0.0f;
 }
 
 
@@ -120,6 +122,9 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 // render 3D scene
 void Scene::render()
 {
+	GLdouble currentTime = glutGet(GLUT_ELAPSED_TIME);
+	GLdouble elapsedTime = currentTime - timeLastFrame;
+
 	Program::useProgram(NULL);
 
 	glMatrixMode(GL_PROJECTION);
@@ -129,7 +134,12 @@ void Scene::render()
 	drawGroundGrid(0.0f, 0.0f, 50.0f, 50.0f, 0.1f);
 
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
-		objects[objectId]->render(getUsingCamera(), &lights[0]);
+		objects[objectId]->render(getUsingCamera(), &lights[0], elapsedTime);
+	}
+
+	if (elapsedTime > Constant::TIME_FOR_A_FRAME){
+		processPhysics();
+		timeLastFrame = glutGet(GLUT_ELAPSED_TIME);
 	}
 }
 
@@ -212,5 +222,18 @@ void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float ran
 		}
 	}
 	glEnd();
+}
+
+void Scene::processPhysics(){
+	for (int objectId = 0; objectId < numOfObjects; ++objectId){
+		if (objectId > 0){
+			Ball * ball = (Ball *)(this->objects[objectId]);
+			for (int otherObjectId = objectId + 1; otherObjectId < numOfObjects; ++otherObjectId){
+				//cout << "Collision test: " << objectId << " collides with " << otherObjectId << endl;
+				Ball * otherBall = (Ball *)(this->objects[otherObjectId]);
+				ball->collideWith(otherBall);
+			}
+		}
+	}
 }
 

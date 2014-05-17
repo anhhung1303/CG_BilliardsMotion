@@ -20,7 +20,9 @@ public:
 	void setUsingCamera(int cameraId);
 	
 	Object * * objects;//TODO set private
-	void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step);
+	void drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step);
+
+	void processPhysics();
 private:
 	Camera * cameras;
 	int numOfCameras;
@@ -32,6 +34,8 @@ private:
 	//Object * * objects;
 	int numOfObjects;
 
-	
+	bool * isCollisionResolve;
+
+	GLdouble timeLastFrame;
 };
 

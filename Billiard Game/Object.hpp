@@ -12,7 +12,7 @@ public:
 	Object();
 	~Object();
 	// render the 3D object
-	virtual void render(Camera * camera, Light * light);
+	virtual void render(Camera * camera, Light * light, GLdouble elapsedTime);
 	// load Model3D from resourceManager
 	void loadModel(int modelId, ResourceManager * resourceManager);
 	// load Program from resourceManager
