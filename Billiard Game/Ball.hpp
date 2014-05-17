@@ -18,7 +18,8 @@ public:
 	void setRadius(float radius);
 	float getRadius();
 
-	void collideWith(Ball * otherBall);
+	void collideWithOtherBall(Ball * otherBall);
+	void collideWithTable();
 private:
 	glm::vec3 velocity;
 	glm::vec3 acceleration;

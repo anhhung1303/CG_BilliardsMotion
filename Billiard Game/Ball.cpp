@@ -43,7 +43,7 @@ void Ball::render(Camera * camera, Light * light, GLdouble elapsedTime)
 // apply new velocity to ball
 void Ball::setVelocity(glm::vec3 velocity)
 {
-	cout << "set ball velocity" << velocity.x << " " << velocity.y << " " << velocity.z << endl;
+	//cout << "set ball velocity" << velocity.x << " " << velocity.y << " " << velocity.z << endl;
 	this->velocity = velocity;
 	if (glm::length(this->velocity) > 0){
 		this->acceleration = glm::normalize(this->velocity) * Constant::FRICTIONAL_COEFFICIENT;
@@ -70,7 +70,7 @@ float Ball::getRadius(){
 	return this->radius;
 }
 
-void Ball::collideWith(Ball * otherBall){
+void Ball::collideWithOtherBall(Ball * otherBall){
 	float spring = 0.003;
 
 	glm::vec4 otherBallPositionInItsLocal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -97,4 +97,33 @@ void Ball::collideWith(Ball * otherBall){
 
 		cout << "Collision detected" << endl;
 	}
+}
+
+void Ball::collideWithTable(){
+	float radiusInWorld = this->getRadius() * glm::length(this->getModelMatrix() * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	//cout << "Radius = " << radiusInWorld << endl;
+
+	glm::vec4 ballPositionInItsLocal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 ballInWorld4 = this->getModelMatrix() * ballPositionInItsLocal;
+	glm::vec3 ballInWorld3 = glm::vec3(ballInWorld4.x, ballInWorld4.y, ballInWorld4.z);
+	float absZ = (ballInWorld3.z > 0) ? ballInWorld3.z : -ballInWorld3.z;
+	//cout << "AbsZ = " << absZ << endl;
+	int inverseX = 1, inverseZ = 1;
+	glm::vec3 oldPosition = ballInWorld3 - velocity;
+	if (absZ + radiusInWorld >= 0.07){
+		inverseZ = -1;
+		//float coef = -(0.07 - absZ + radiusInWorld) / ((velocity.z >= 0) ? velocity.z : -velocity.z);
+		//this->translate(velocity*coef);
+		this->translate(velocity*-1.0f);
+	}
+	float absX = (ballInWorld3.x > 0) ? ballInWorld3.x : -ballInWorld3.x;
+	//cout << "absX = " << absX << endl;
+	if (absX + radiusInWorld >= 0.143){
+		inverseX = -1;
+		//float coef = -(0.143 - absX + radiusInWorld) / ((velocity.x >= 0) ? velocity.x : -velocity.x);
+		//this->translate(velocity*coef);
+		this->translate(velocity*-1.0f);
+	}
+	this->setVelocity(glm::vec3(inverseX * velocity.x, 0.0f, inverseZ * velocity.z));
+
 }

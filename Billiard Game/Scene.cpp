@@ -221,6 +221,16 @@ void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float ran
 			glVertex3f(centerX + rangeX, 0.0f, centerZ - line);
 		}
 	}
+	glColor3f(1.0f, 1.0f, 0.0f);
+	glVertex3f(-50.0f, 0.0f, 0.07f);
+	glVertex3f(50.0f, 0.0f, 0.07f);
+	glVertex3f(-50.0f, 0.0f, -0.07f);
+	glVertex3f(50.0f, 0.0f, -0.07f);
+
+	glVertex3f(0.143f, 0.0f, -50.0f);
+	glVertex3f(0.143f, 0.0f, 50.0f);
+	glVertex3f(-0.143f, 0.0f, -50.0f);
+	glVertex3f(-0.143f, 0.0f, 50.0f);
 	glEnd();
 }
 
@@ -228,10 +238,11 @@ void Scene::processPhysics(){
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
 		if (objectId > 0){
 			Ball * ball = (Ball *)(this->objects[objectId]);
+			ball->collideWithTable();
 			for (int otherObjectId = objectId + 1; otherObjectId < numOfObjects; ++otherObjectId){
 				//cout << "Collision test: " << objectId << " collides with " << otherObjectId << endl;
 				Ball * otherBall = (Ball *)(this->objects[otherObjectId]);
-				ball->collideWith(otherBall);
+				ball->collideWithOtherBall(otherBall);
 			}
 		}
 	}
