@@ -191,24 +191,27 @@ void processMouseButtons(int button, int state, int x, int y){
 			glm::vec4 cameraInWorld = glm::inverse(camera->getViewMatrix()) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			
 			glm::vec4 firstRay = getRay(startX, startY);
-			cout << "firstRay = " << firstRay.x << " " << firstRay.y << " " << firstRay.z << " " << firstRay.t << " " << endl;
 			firstRay.x = firstRay.x / firstRay.y * -cameraInWorld.y;
 			firstRay.z = firstRay.z / firstRay.y * -cameraInWorld.y;
 			firstRay.y = -cameraInWorld.y;
+			cout << "firstRay = " << firstRay.x << " " << firstRay.y << " " << firstRay.z << " " << firstRay.w << " " << endl;
 
 			glm::vec4 secondRay = getRay(x, y);
-			cout << "secondRay = " << secondRay.x << " " << secondRay.y << " " << secondRay.z << " " << secondRay.t << " " << endl;
 			secondRay.x = secondRay.x / secondRay.y * -cameraInWorld.y;
 			secondRay.z = secondRay.z / secondRay.y * -cameraInWorld.y;
 			secondRay.y = -cameraInWorld.y;
+			cout << "secondRay = " << secondRay.x << " " << secondRay.y << " " << secondRay.z << " " << secondRay.w << " " << endl;
 
 			glm::vec3 velocity = glm::vec3(secondRay.x - firstRay.x, secondRay.y - firstRay.y, secondRay.z - firstRay.z);
-			velocity = glm::normalize(velocity);
-			cout << "velocity = " << velocity.x << " " << velocity.y << " " << velocity.z << " " << velocity.t << " " << endl;
-			cout << "length = " << glm::length(velocity) << endl;
+			if (glm::length(velocity) > 0){
+				velocity = glm::normalize(velocity);
+				cout << "velocity = " << velocity.x << " " << velocity.y << " " << velocity.z << " " << endl;
+				cout << "length = " << glm::length(velocity) << endl;
+
+				Ball * ball = (Ball *)(sceneManager.getScene(0)->objects[1]);
+				ball->setVelocity(glm::vec3(velocity.x * 0.02f, 0.0f, velocity.z * 0.02f));
+			}
 			
-			Ball * ball = (Ball *)(sceneManager.getScene(0)->objects[1]);
-			ball->setVelocity(glm::vec3(velocity.x * 0.02f, 0.0f, velocity.z * 0.02f));
 		}
 	}
 
