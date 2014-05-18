@@ -9,25 +9,30 @@
 #pragma comment(lib, "assimp.lib")
 #endif
 
+//Third-party include
 #include <gl/glew.h>
 #include <gl/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+
+//System include
 #include <iostream>
 
+//Project include
 #include "camera.hpp"
 #include "shader.hpp"
 #include "model3D.hpp"
 #include "light.hpp"
+#include "handling.hpp"
 #include "util.hpp"
 
 using namespace std;
 
-#define VERTEX_SHADER_FILE		"./Resource/Shader/basic_light.vert"
-#define FRAGMENT_SHADER_FILE	"./Resource/Shader/basic_light.frag"
-#define MODEL_FILE				"./Resource/Model/TournamentTable.lwo"
+#define VERTEX_SHADER_FILE		"./Resource/Shader/test.vert"
+#define FRAGMENT_SHADER_FILE	"./Resource/Shader/test.frag"
+#define MODEL_FILE				"./Resource/Test Model/Utah Teapot Hires.obj"
 #define TEXTURE_FILE			"./Resource/Model/TextureDemo.png"
 
 glm::mat4 projectionMarix; //in scene
@@ -46,19 +51,23 @@ float zNear = 0.1f, zFar = 100.0f;
 //Functions prototype
 void initGL(int argc, char *argv[]);
 void initData();
-void specialKeyFunc(int key, int x, int y);
-void keyboardFunc(unsigned char key, int x, int y);
 void displayFunc();
 void drawGroundGrid(float centerX, float centerZ, float rangeX, float rangeZ, float step);
-
 
 int main(int argc, char *argv[]){
 	initGL(argc, argv);
 	initData();
 
 	glutDisplayFunc(displayFunc);
-	glutSpecialFunc(specialKeyFunc);
-	glutKeyboardFunc(keyboardFunc);
+
+	Keyboard::setCamera(camera);
+	glutSpecialFunc(Keyboard::specialKeyFunc);
+	glutKeyboardFunc(Keyboard::keyboardFunc);
+
+	Mouse::setCamera(camera);
+	Mouse::setWindow(width, height);
+	glutMouseFunc(Mouse::mouseFunc);
+	glutMotionFunc(Mouse::mouseMotionFunc);
 
 	glutMainLoop();
 	return 0;
@@ -75,17 +84,18 @@ void initGL(int argc, char *argv[]){
 	if (res != GLEW_OK){
 		fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
 	}
-	printf("======================= System Info =======================\n");
-	printf("\tVendor: %s\n", glGetString(GL_VENDOR));
-	printf("\tRenderer: %s\n", glGetString(GL_RENDERER));
-	printf("\tGL Version: %s\n", glGetString(GL_VERSION));
-	printf("\tGLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	printf("===========================================================\n");
+	fprintf(stdout, "======================= System Info =======================\n");
+	fprintf(stdout, "\tVendor: %s\n", glGetString(GL_VENDOR));
+	fprintf(stdout, "\tRenderer: %s\n", glGetString(GL_RENDERER));
+	fprintf(stdout, "\tGL Version: %s\n", glGetString(GL_VERSION));
+	fprintf(stdout, "\tGLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	fprintf(stdout, "\tGLEW Version: %s\n", glewGetString(GLEW_VERSION));
+	fprintf(stdout, "===========================================================\n");
 
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glEnable(GL_POINT_SMOOTH);
@@ -119,104 +129,22 @@ void initData(){
 
 	projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);
 	camera = new Camera();
-	camera->translate(glm::vec3(0.0f, 0.0f, -0.34f));
+	camera->translate(glm::vec3(3.0f, 0.5f, 4.0f), VIEW_COORDINATES, VIEW_COORDINATES);
+	camera->rotate(45, yAxis, VIEW_COORDINATES);
 	camera->push();
 
 	LightSource ls;
 	ls.position = glm::vec3(5.0f, 5.0f, 5.0f);
-	//ls.ambientIntensity = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
-	//ls.diffuseIntensity = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
-	//ls.specularIntensity = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+	ls.ambientIntensity = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
+	ls.diffuseIntensity = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
+	ls.specularIntensity = glm::vec4(0.75f, 0.75f, 0.75f, 1.0f);
 
 	light = new Light();
 	light->setLightSource(&ls);
 
 	model = new Model3D();
 	model->loadModel(MODEL_FILE);
-	model->scale(0.1f);
-}
-
-void specialKeyFunc(int key, int x, int y){
-	static float coef = -0.005f; //Coefficient must to be negative
-	switch (key) {
-	case GLUT_KEY_UP:
-		if (glutGetModifiers() == GLUT_ACTIVE_CTRL){ //Zoom in
-			camera->translate(0.0f, 0.0f, -coef * 2);
-		}
-		else { //Move Camera up
-			camera->translate(0.0f, coef, 0.0f);
-		}
-		break;
-	case GLUT_KEY_DOWN:
-		if (glutGetModifiers() == GLUT_ACTIVE_CTRL){ //Zoom out
-			camera->translate(0.0f, 0.0f, coef * 2);
-		}
-		else { //Move Camera down
-			camera->translate(0.0f, -coef, 0.0f);
-		}
-		break;
-	case GLUT_KEY_RIGHT: //Move Camera right
-		camera->translate(coef, 0.0f, 0.0f);
-		break;
-	case GLUT_KEY_LEFT: //Move Camera left
-		camera->translate(-coef, 0.0f, 0.0f);
-		break;
-	case GLUT_KEY_F4:
-		if (glutGetModifiers() == GLUT_ACTIVE_ALT){ //Exit
-			exit(0);
-		}
-	}
-	glutPostRedisplay();
-}
-
-void keyboardFunc(unsigned char key, int x, int y){
-	static float angle = 1.0f;
-	static float coef = -0.005f;
-	switch (key){
-	case 'q': case 'Q':
-		camera->rotate(-angle, xAxis);
-		break;
-	case 'w': case 'W':
-		camera->rotate(angle, xAxis);
-		break;
-	case 'a': case 'A':
-		camera->rotate(-angle, yAxis);
-		break;
-	case 's': case 'S':
-		camera->rotate(angle, yAxis);
-		break;
-	case 'z': case 'Z':
-		camera->rotate(-angle, zAxis);
-		break;
-	case 'x': case 'X':
-		camera->rotate(angle, zAxis);
-		break;
-	case '2':
-		model->translate(-yAxis * coef);
-		break;
-	case '4':
-		model->translate(-xAxis * coef);
-		break;
-	case '6':
-		model->translate(xAxis * coef);
-		break;
-	case '8':
-		model->translate(yAxis * coef);
-		break;
-	case '5':
-		model->translate(-zAxis * coef);
-		break;
-	case '0':
-		model->translate(zAxis * coef);
-		break;
-	case '1':
-		model->rotate(-angle, yAxis * coef);
-		break;
-	case '3':
-		model->rotate(angle, yAxis * coef);
-		break;
-	}
-	glutPostRedisplay();
+	model->scale(0.5, MODEL_COORINATES);
 }
 
 void displayFunc(){
@@ -227,13 +155,13 @@ void displayFunc(){
 	glLoadMatrixf(glm::value_ptr(projectionMarix));
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(glm::value_ptr(camera->getViewMatrix()));
-	drawGroundGrid(0.0f, 0.0f, 50.0f, 50.0f, 0.1f);
+	drawGroundGrid(0.0f, 0.0f, 50.0f, 50.0f, 0.5f);
 
 	Program::useProgram(program);
 	glUniformMatrix4fv(Camera::uViewMatrixLoc, 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
 	glUniformMatrix4fv(uProjMatrixLoc, 1, GL_FALSE, glm::value_ptr(projectionMarix));
 
-	glm::vec3 viewPos = camera->getViewPosition();
+	glm::vec3 viewPos = camera->getViewPoint();
 	glUniform3f(Camera::uViewPosLoc, viewPos.x, viewPos.y, viewPos.z);
 #ifdef PRINT_CAMERA_POSITION
 	cout << "Camera Pos:\t" << viewPos << endl;
@@ -248,7 +176,6 @@ void displayFunc(){
 	}
 
 	model->render();
-
 	glutSwapBuffers();
 }
 

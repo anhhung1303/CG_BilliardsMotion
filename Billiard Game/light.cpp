@@ -16,7 +16,6 @@ LightSource::LightSource(){
 }
 
 Light::Light(){
-	clear();
 	uLight = new LightSource();
 }
 
@@ -28,6 +27,7 @@ void Light::clear(){
 	glDeleteBuffers(1, &uboLight);
 	if (uLight != NULL){
 		delete uLight;
+		uLight = NULL;
 	}
 }
 

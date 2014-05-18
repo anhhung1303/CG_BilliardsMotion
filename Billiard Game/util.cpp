@@ -220,3 +220,81 @@ std::ostream& operator<<(std::ostream& os, const LightSource& ls){
 	os << "      + Quadratic:\t" << ls.attenuationQuadratic << std::endl;
 	return os;
 }
+
+glm::vec3 extractScaling(const glm::mat4& matrix){
+	glm::vec3 col1(matrix[0][0], matrix[0][1], matrix[0][2]);
+	glm::vec3 col2(matrix[1][0], matrix[1][1], matrix[1][2]);
+	glm::vec3 col3(matrix[2][0], matrix[2][1], matrix[2][2]);
+
+	glm::vec3 scaling;
+	//Extract the scaling factors
+	scaling.x = glm::length(col1);
+	scaling.y = glm::length(col2);
+	scaling.z = glm::length(col3);
+
+	// Handle negative scaling
+	if (glm::determinant(matrix) < 0) {
+		scaling.x = -scaling.x;
+		scaling.y = -scaling.y;
+		scaling.z = -scaling.z;
+	}
+	return scaling;
+}
+
+void decomposeTRS(const glm::mat4& matrix, glm::vec3& scaling,
+	glm::mat4& rotation, glm::vec3& translation) {
+	// Extract the translation
+	translation.x = matrix[3][0];
+	translation.y = matrix[3][1];
+	translation.z = matrix[3][2];
+
+	// Extract col vectors of the matrix
+	glm::vec3 col1(matrix[0][0], matrix[0][1], matrix[0][2]);
+	glm::vec3 col2(matrix[1][0], matrix[1][1], matrix[1][2]);
+	glm::vec3 col3(matrix[2][0], matrix[2][1], matrix[2][2]);
+
+	//Extract the scaling factors
+	scaling.x = glm::length(col1);
+	scaling.y = glm::length(col2);
+	scaling.z = glm::length(col3);
+
+	// Handle negative scaling
+	if (glm::determinant(matrix) < 0) {
+		scaling.x = -scaling.x;
+		scaling.y = -scaling.y;
+		scaling.z = -scaling.z;
+	}
+
+	// Remove scaling from the matrix
+	if (scaling.x != 0) {
+		col1 /= scaling.x;
+	}
+
+	if (scaling.y != 0) {
+		col2 /= scaling.y;
+	}
+
+	if (scaling.z != 0) {
+		col3 /= scaling.z;
+	}
+
+	rotation[0][0] = col1.x;
+	rotation[0][1] = col1.y;
+	rotation[0][2] = col1.z;
+	rotation[0][3] = 0.0;
+
+	rotation[1][0] = col2.x;
+	rotation[1][1] = col2.y;
+	rotation[1][2] = col2.z;
+	rotation[1][3] = 0.0;
+
+	rotation[2][0] = col3.x;
+	rotation[2][1] = col3.y;
+	rotation[2][2] = col3.z;
+	rotation[2][3] = 0.0;
+
+	rotation[3][0] = 0.0;
+	rotation[3][1] = 0.0;
+	rotation[3][2] = 0.0;
+	rotation[3][3] = 1.0;
+}

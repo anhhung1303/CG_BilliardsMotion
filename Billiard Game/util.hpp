@@ -20,9 +20,17 @@
 
 //Return variable name of var
 #define VAR_NAME(var) #var
+#define EPSILON 1e-3
+
 #define PARSING_DIRECTORY		0x1
 #define PARSING_FILE_NAME		0x2
 #define PARSING_FILE_EXTENSION	0x4
+
+enum Coordinates{
+	MODEL_COORINATES,
+	WORLD_COORDINATES,
+	VIEW_COORDINATES,
+};
 
 const static glm::vec3 xAxis(1.0f, 0.0f, 0.0f);
 const static glm::vec3 yAxis(0.0f, 1.0f, 0.0f);
@@ -54,3 +62,26 @@ extern struct LightSource;
 extern struct LightMaterial;
 std::ostream& operator<<(std::ostream& os, const LightSource& ls);
 std::ostream& operator<<(std::ostream& os, const LightMaterial& met);
+
+glm::vec3 extractScaling(const glm::mat4& matrix);
+
+/**
+* Decomposes matrix M such that T * R * S = M, where: 
+*	T is translation matrix,
+*	R is rotation matrix and
+*	S is scaling matrix.
+* http://code.google.com/p/assimp-net/source/browse/trunk/AssimpNet/Matrix4x4.cs
+* (this method is exact to at least 0.0001f)
+*
+* | 1  0  0  Tx | | R11 R12 R13 0 | | Sx 0  0  0 |   | SxR11 SyR12 SzR13 Tx |
+* | 0  1  0  Ty |.| R21 R22 R23 0 |.| 0  Sy 0  0 | = | SxR21 SyR22 SzR23 Ty |
+* | 0  0  0  Tz | | R31 R32 R33 0 | | 0  0  Sz 0 |   | SxR31 SyR32 SzR33 Tz |
+* | 0  0  0   1 | |  0   0   0  1 | | 0  0  0  1 |   |   0     0     0    1 |
+*
+* @param matrix (in) matrix to decompose
+* @param scaling (out) scaling vector
+* @param rotation (out) rotation matrix
+* @param translation (out) translation vector
+*/
+void decomposeTRS(const glm::mat4& matrix, glm::vec3& scaling,
+	glm::mat4& rotation, glm::vec3& translation);

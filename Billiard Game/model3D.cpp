@@ -102,7 +102,7 @@ void Model3D::importTextures(const aiScene* scene, const std::string& path){
 
 		if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &file) == aiReturn_SUCCESS){
 			Texture* tex = new Texture();
-			
+
 			if (tex->loadTexture(parsingURL(path, PARSING_DIRECTORY) + "/" +
 				parsingURL(file.data, PARSING_DIRECTORY | PARSING_FILE_NAME | PARSING_FILE_EXTENSION))){
 				textures[file.data] = tex;
@@ -148,20 +148,71 @@ Node* Model3D::builtNode(const aiNode* node){
 	return nod;
 }
 
-void Model3D::translate(glm::vec3 distance){
-	root->modelMatrix = glm::translate(distance) * root->modelMatrix;
+void Model3D::translate(glm::vec3 distance, const Coordinates& coor, const Coordinates& dis){
+	switch (dis){
+	case MODEL_COORINATES:
+		if (coor == WORLD_COORDINATES){ //Convert distance from model coordiantes to world coordiantes
+			distance = extractScaling(root->modelMatrix) * distance;
+		}
+		break;
+	case WORLD_COORDINATES:
+		if (coor == MODEL_COORINATES){ //Convert distance form view coordiante to world coordiante
+			distance = (1.0f / extractScaling(root->modelMatrix)) * distance;
+		}
+		break;
+	default:
+		return; //Model Coordiante Invalid enum => Do nothing
+	}
+
+	switch (coor){
+	case WORLD_COORDINATES:
+		root->modelMatrix = glm::translate(distance) * root->modelMatrix;
+		break;
+	case MODEL_COORINATES:
+		root->modelMatrix = glm::translate(root->modelMatrix, distance);
+		break;
+	}
+	//View Coordiante: Invalid enum => Do nothing
 }
 
-void Model3D::rotate(float angle, glm::vec3 axis){
-	root->modelMatrix = glm::rotate(angle, axis) * root->modelMatrix;
+void Model3D::translate(float dx, float dy, float dz, const Coordinates& coor, const Coordinates& dis){
+	translate(glm::vec3(dx, dy, dz), coor, dis);
 }
 
-void Model3D::scale(float scaleFactor){
-	scale(glm::vec3(scaleFactor));
+void Model3D::rotate(float angle, glm::vec3 axis, const Coordinates& coor){
+	switch (coor){
+	case WORLD_COORDINATES:
+		root->modelMatrix = glm::rotate(angle, axis) * root->modelMatrix;
+		break;
+	case MODEL_COORINATES:
+		root->modelMatrix = glm::rotate(root->modelMatrix, angle, axis);
+		break;
+	}
+	//View Coordiante: Invalid enum => Do nothing
 }
 
-void Model3D::scale(glm::vec3 scaleFactor){
-	root->modelMatrix = glm::scale(scaleFactor) * root->modelMatrix;
+void Model3D::rotate(float angle, float ox, float oy, float oz, const Coordinates& coor){
+	rotate(angle, glm::vec3(ox, oy, oz), coor);
+}
+
+void Model3D::scale(glm::vec3 factor, const Coordinates& coor){
+	switch (coor){
+	case WORLD_COORDINATES:
+		root->modelMatrix = glm::scale(factor) * root->modelMatrix;
+		break;
+	case MODEL_COORINATES:
+		root->modelMatrix = glm::scale(root->modelMatrix, factor);
+		break;
+	}
+	//View Coordiante: Invalid enum => Do nothing
+}
+
+void Model3D::scale(float factor, const Coordinates& coor){
+	scale(glm::vec3(factor), coor);
+}
+
+void Model3D::scale(float fx, float fy, float fz, const Coordinates& coor){
+	scale(glm::vec3(fx, fy, fz), coor);
 }
 
 void Model3D::render(){
@@ -191,7 +242,8 @@ void Model3D::draw(const Node* node, const glm::mat4& preMatrix){
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, tex->getTextureUnit());
 			glUniform1i(Texture::uTextureCountLoc, 1);
-		} else {
+		}
+		else {
 			glUniform1i(Texture::uTextureCountLoc, NULL);
 		}
 

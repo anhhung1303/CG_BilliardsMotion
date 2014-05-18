@@ -23,6 +23,7 @@ void Material::clear(){
 	glDeleteBuffers(1, &uboMaterial);
 	if (uMaterial != NULL){
 		delete uMaterial;
+		uMaterial = NULL;
 	}
 }
 
