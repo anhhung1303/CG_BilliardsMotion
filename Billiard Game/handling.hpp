@@ -32,6 +32,7 @@ public:
 
 	static void mouseFunc(int button, int state, int x, int y);
 	static void mouseMotionFunc(int x, int y);
+	static void mouseWheelFunc(int wheel, int direction, int x, int y);
 private:
 	static void applyChange(const glm::ivec2& curPos);
 };

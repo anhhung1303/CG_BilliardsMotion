@@ -17,6 +17,7 @@
 //#define PRINT_LIGHT_SOURCE
 //#define PRINT_LIGHT_MATERIAL
 //#define PRINT_CAMERA_POSITION
+//#define PRINT_UNIFORM
 
 //Return variable name of var
 #define VAR_NAME(var) #var
@@ -66,7 +67,7 @@ std::ostream& operator<<(std::ostream& os, const LightMaterial& met);
 glm::vec3 extractScaling(const glm::mat4& matrix);
 
 /**
-* Decomposes matrix M such that T * R * S = M, where: 
+* Decomposes matrix M such that T * R * S = M, where:
 *	T is translation matrix,
 *	R is rotation matrix and
 *	S is scaling matrix.

@@ -2,6 +2,7 @@
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glu32.lib")
 #pragma comment(lib, "glut32.lib")
+#pragma comment(lib, "freeglut.lib")
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "devil.lib")
 #pragma comment(lib, "ilu.lib")
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]){
 	Mouse::setWindow(width, height);
 	glutMouseFunc(Mouse::mouseFunc);
 	glutMotionFunc(Mouse::mouseMotionFunc);
+	//glutMouseWheelFunc(Mouse::mouseWheelFunc);
 
 	glutMainLoop();
 	return 0;
@@ -125,7 +127,9 @@ void initData(){
 	Light::uboLightLoc = glGetUniformBlockIndex(p, "Light");
 	Texture::uTextureCountLoc = glGetUniformLocation(p, "texCount");
 	Camera::uViewPosLoc = glGetUniformLocation(p, "viewPos");
+#ifdef PRINT_UNIFORM
 	program->printActiveUniform();
+#endif
 
 	projectionMarix = glm::perspective(fovy, aspect, zNear, zFar);
 	camera = new Camera();

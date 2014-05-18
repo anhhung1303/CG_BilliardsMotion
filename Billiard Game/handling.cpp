@@ -95,3 +95,12 @@ void Mouse::applyChange(const glm::ivec2& curPos){
 	glm::vec3 uAxis = glm::normalize(viewInverse * xAxis);
 	cam->rotate(coef * delta.y / float(windowHeight), uAxis, WORLD_COORDINATES);
 }
+
+void Mouse::mouseWheelFunc(int wheel, int direction, int x, int y){
+	if (direction > 0){ //Move camera frontward
+		cam->translate(0.0f, 0.0f, -coef * 2, VIEW_COORDINATES, VIEW_COORDINATES);
+	}
+	else { //Move camera backward
+		cam->translate(0.0f, 0.0f, coef * 2, VIEW_COORDINATES, VIEW_COORDINATES);
+	}
+}

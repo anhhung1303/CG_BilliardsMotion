@@ -38,12 +38,12 @@ std::string parsingURL(const std::string& path, int urlPasingMode){
 	//Checking that dot is separator extension or not
 	auto checkExtensionDot = [&](std::string::size_type dotIndex)->bool{
 		int first = dotIndex, last = dotIndex;
-		while (int(first) >= 0 && path[first] == '.') first--;
-		while (int(last) < path.length() && path[last] == '.') last++;
+		while ((first >= 0) && (path[first] == '.')) first--;
+		while ((last < (int)path.length()) && (path[last] == '.')) last++;
 
 		int flag = 0;
 		if ((first < 0) || (path[first] == '\\') || (path[first] == '/')) flag++;
-		if ((last >= path.length()) || (path[last] == '\\') || (path[last] == '/')) flag++;
+		if ((last >= (int)path.length()) || (path[last] == '\\') || (path[last] == '/')) flag++;
 		return flag != 2;
 	};
 
@@ -74,7 +74,7 @@ std::string parsingURL(const std::string& path, int urlPasingMode){
 		result += file_name;
 	}
 	if ((urlPasingMode & PARSING_FILE_EXTENSION) != 0x0){
-		if (!result.empty()) result += '.'; 
+		if (!result.empty()) result += '.';
 		result += ext;
 	}
 	return result;
