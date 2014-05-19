@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <glm/glm.hpp>
 #include <assimp/Importer.hpp>
@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <vector>
 #include <assert.h>
 #include <sys/stat.h>
 
@@ -21,7 +22,7 @@
 
 //Return variable name of var
 #define VAR_NAME(var) #var
-#define EPSILON 1e-3
+#define EPSILON 1e-5
 
 #define PARSING_DIRECTORY		0x1
 #define PARSING_FILE_NAME		0x2
@@ -65,6 +66,17 @@ std::ostream& operator<<(std::ostream& os, const LightSource& ls);
 std::ostream& operator<<(std::ostream& os, const LightMaterial& met);
 
 glm::vec3 extractScaling(const glm::mat4& matrix);
+glm::vec3 extractTranslation(const glm::mat4& matrix);
+void extractAngleAndAxis(const glm::mat4& matrix, float& angle, glm::vec3& axis);
+
+/**
+* A yaw is a counterclockwise rotation of $alpha about the z-axis	Rz(yaw)
+* A pitch is a counterclockwise rotation of $beta about the y-axis	Ry(pitch)
+* A roll is a counterclockwise rotation of $gamma about the x-axis	Rx(roll)
+* The yaw, pitch, and roll rotations can be used to place a 3D body in any orientation.
+* R = Rz(yaw) * Ry(pitch) * Rx(roll)
+*/
+void extractYawPitchRoll(const glm::mat4& matrix, float& yaw, float& pitch, float& roll);
 
 /**
 * Decomposes matrix M such that T * R * S = M, where:

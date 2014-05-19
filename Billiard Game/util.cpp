@@ -222,12 +222,13 @@ std::ostream& operator<<(std::ostream& os, const LightSource& ls){
 }
 
 glm::vec3 extractScaling(const glm::mat4& matrix){
+	// Extract column vectors of the matrix
 	glm::vec3 col1(matrix[0][0], matrix[0][1], matrix[0][2]);
 	glm::vec3 col2(matrix[1][0], matrix[1][1], matrix[1][2]);
 	glm::vec3 col3(matrix[2][0], matrix[2][1], matrix[2][2]);
 
 	glm::vec3 scaling;
-	//Extract the scaling factors
+	// Extract the scaling factors
 	scaling.x = glm::length(col1);
 	scaling.y = glm::length(col2);
 	scaling.z = glm::length(col3);
@@ -241,6 +242,41 @@ glm::vec3 extractScaling(const glm::mat4& matrix){
 	return scaling;
 }
 
+glm::vec3 extractTranslation(const glm::mat4& matrix){
+	glm::vec3 translation;
+	// Extract the translation
+	translation.x = matrix[3][0];
+	translation.y = matrix[3][1];
+	translation.z = matrix[3][2];
+
+	return translation;
+}
+
+void extractAngleAndAxis(const glm::mat4& matrix, float& angle, glm::vec3& axis){
+	float cos = (matrix[0][0] + matrix[1][1] + matrix[2][2] - 1.0f) / 2.0f;
+	if (abs(cos - 1.0f) < EPSILON){
+		angle = 0.0f;
+		axis = xAxis;
+		return;
+	}
+
+	axis.x = (abs(matrix[0][0] - cos) < EPSILON) ? 0 : sqrtf((matrix[0][0] - cos) / (1 - cos));
+	axis.y = (abs(matrix[1][1] - cos) < EPSILON) ? 0 : sqrtf((matrix[1][1] - cos) / (1 - cos));
+	axis.z = (abs(matrix[2][2] - cos) < EPSILON) ? 0 : sqrtf((matrix[2][2] - cos) / (1 - cos));
+
+	float sin = ((matrix[1][2] + matrix[2][0] + matrix[0][1]) -
+		(matrix[2][1] + matrix[0][2] + matrix[1][0])) /
+		(2.0f * (axis.x + axis.y + axis.z));
+
+	angle = atan2f(sin, cos);
+}
+
+void extractYawPitchRoll(const glm::mat4& matrix, float& yaw, float& pitch, float& roll){
+	roll = atan2f(matrix[1][2], matrix[2][2]);
+	pitch = atan2f(-matrix[0][2], sqrtf(powf(matrix[1][2], 2) + powf(matrix[2][2], 2)));
+	yaw = atan2f(matrix[0][1], matrix[0][0]);
+}
+
 void decomposeTRS(const glm::mat4& matrix, glm::vec3& scaling,
 	glm::mat4& rotation, glm::vec3& translation) {
 	// Extract the translation
@@ -248,12 +284,12 @@ void decomposeTRS(const glm::mat4& matrix, glm::vec3& scaling,
 	translation.y = matrix[3][1];
 	translation.z = matrix[3][2];
 
-	// Extract col vectors of the matrix
+	// Extract column vectors of the matrix
 	glm::vec3 col1(matrix[0][0], matrix[0][1], matrix[0][2]);
 	glm::vec3 col2(matrix[1][0], matrix[1][1], matrix[1][2]);
 	glm::vec3 col3(matrix[2][0], matrix[2][1], matrix[2][2]);
 
-	//Extract the scaling factors
+	// Extract the scaling factors
 	scaling.x = glm::length(col1);
 	scaling.y = glm::length(col2);
 	scaling.z = glm::length(col3);
