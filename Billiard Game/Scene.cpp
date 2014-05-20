@@ -83,6 +83,9 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		fscanf(inputFile, "POS/DIR %f, %f, %f\n", &x, &y, &z);
 		LightSource * lightSource = new LightSource();
 		lightSource->position = glm::vec3(x, y, z);
+		lightSource->ambientIntensity = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
+		lightSource->diffuseIntensity = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
+		lightSource->specularIntensity = glm::vec4(0.75f, 0.75f, 0.75f, 1.0f);
 		lights[idLight].setLightSource(lightSource);
 		char type[10];
 		fscanf(inputFile, "TYPE %s\n", type);
@@ -101,9 +104,9 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	for (int idCamera = 0; idCamera < numOfCameras; ++idCamera){
 		int temp;
 		fscanf(inputFile, "ID %d\n", &temp);
-		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
-		cameras[idCamera].push();
-		cameras[idCamera].translate(glm::vec3(x, y, z));
+		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);		
+		cameras[idCamera].translate(glm::vec3(x, y, z), WORLD_COORDINATES, WORLD_COORDINATES);
+		//camera->rotate(45, yAxis, VIEW_COORDINATES);
 		//cout << "Camera position = " << x << " " << y << " " << z << endl;
 
 		GLfloat zNear, zFar, fovy, aspect;
@@ -113,6 +116,7 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		fscanf(inputFile, "ASPECT %f\n", &aspect);
 		cameras[idCamera].setProjectionMatrix(glm::perspective(fovy, aspect, zNear, zFar));
 		//cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
+		cameras[idCamera].push();
 	}
 	
 	setUsingCamera(0);
@@ -122,8 +126,7 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 // render 3D scene
 void Scene::render()
 {
-	GLdouble currentTime = glutGet(GLUT_ELAPSED_TIME);
-	GLdouble elapsedTime = currentTime - timeLastFrame;
+	GLdouble elapsedTime = glutGet(GLUT_ELAPSED_TIME) - timeLastFrame;
 
 	Program::useProgram(NULL);
 

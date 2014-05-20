@@ -22,7 +22,8 @@
 using namespace Assimp;
 
 class Model3D{
-private:
+public:
+//private:
 	std::vector<Mesh*> meshes;
 	std::vector<Material*> materials;
 	std::map<std::string, Texture*> textures;
@@ -36,10 +37,15 @@ public:
 
 	void render();
 
-	void translate(glm::vec3 distance);
-	void rotate(float angle, glm::vec3 axis);
-	void scale(float scaleFactor);
-	void scale(glm::vec3 scaleFactor);
+	void translate(glm::vec3 distance, const Coordinates& coor, const Coordinates& dis);
+	void translate(float dx, float dy, float dz, const Coordinates& coor, const Coordinates& dis);
+	void rotate(float angle, glm::vec3 axis, const Coordinates& coor);
+	void rotate(float angle, float ox, float oy, float oz, const Coordinates& coor);
+	void scale(glm::vec3 factor, const Coordinates& coor);
+	void scale(float factor, const Coordinates& coor);
+	void scale(float fx, float fy, float fz, const Coordinates& coor);
+
+	glm::mat4 getModelMatrix();
 private:
 	void importMeshes(const aiScene* scene);
 	void importMaterials(const aiScene* scene);

@@ -23,6 +23,7 @@
 #include "ResourceManager.hpp"
 #include "Constant.hpp"
 #include "Ball.hpp"
+#include "handling.hpp"
 
 
 using namespace std;
@@ -42,17 +43,18 @@ void init(int argc, char *argv[]){
 	if (res != GLEW_OK){
 		fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
 	}
-	printf("======================= System Info =======================\n");
-	printf("\tVendor: %s\n", glGetString(GL_VENDOR));
-	printf("\tRenderer: %s\n", glGetString(GL_RENDERER));
-	printf("\tGL Version: %s\n", glGetString(GL_VERSION));
-	printf("\tGLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	printf("===========================================================\n");
+	fprintf(stdout, "======================= System Info =======================\n");
+	fprintf(stdout, "\tVendor: %s\n", glGetString(GL_VENDOR));
+	fprintf(stdout, "\tRenderer: %s\n", glGetString(GL_RENDERER));
+	fprintf(stdout, "\tGL Version: %s\n", glGetString(GL_VERSION));
+	fprintf(stdout, "\tGLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	fprintf(stdout, "\tGLEW Version: %s\n", glewGetString(GLEW_VERSION));
+	fprintf(stdout, "===========================================================\n");
 
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glEnable(GL_POINT_SMOOTH);
@@ -78,69 +80,13 @@ void idleFunc(){
 	glutPostRedisplay();
 }
 
-void specialKeyFunc(int key, int x, int y){
-	static float coef = -0.005f; //Coefficient must to be negative
-	switch (key) {
-	case GLUT_KEY_UP:
-		if (glutGetModifiers() == GLUT_ACTIVE_CTRL){ //Zoom in
-			camera->translate(0.0f, 0.0f, -coef * 2);
-		}
-		else { //Move Camera up
-			camera->translate(0.0f, coef, 0.0f);
-		}
-		break;
-	case GLUT_KEY_DOWN:
-		if (glutGetModifiers() == GLUT_ACTIVE_CTRL){ //Zoom out
-			camera->translate(0.0f, 0.0f, coef * 2);
-		}
-		else { //Move Camera down
-			camera->translate(0.0f, -coef, 0.0f);
-		}
-		break;
-	case GLUT_KEY_RIGHT: //Move Camera right
-		camera->translate(coef, 0.0f, 0.0f);
-		break;
-	case GLUT_KEY_LEFT: //Move Camera left
-		camera->translate(-coef, 0.0f, 0.0f);
-		break;
-	case GLUT_KEY_F4:
-		if (glutGetModifiers() == GLUT_ACTIVE_ALT){ //Exit
-			exit(0);
-		}
-	}
-	glutPostRedisplay();
-}
-
 void keyboardFunc(unsigned char key, int x, int y){
 	static float angle = 1.0f;
 	static float coef = -0.005f;
 	switch (key){
-	case 'q': case 'Q':
-		camera->rotate(-angle, xAxis);
-		break;
-	case 'w': case 'W':
-		camera->rotate(angle, xAxis);
-		break;
-	case 'a': case 'A':
-		camera->rotate(-angle, yAxis);
-		break;
-	case 's': case 'S':
-		camera->rotate(angle, yAxis);
-		break;
-	case 'z': case 'Z':
-		camera->rotate(-angle, zAxis);
-		break;
-	case 'x': case 'X':
-		camera->rotate(angle, zAxis);
-		break;
 	case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 		sceneManager.getScene(0)->setUsingCamera(key - '0');
 		camera = sceneManager.getScene(0)->getUsingCamera();
-		break;
-	//TODO delete this case
-	case 'o': case 'O':
-		Ball * ball = (Ball *)(sceneManager.getScene(0)->objects[1]);
-		ball->setVelocity(glm::vec3(0.02f, 0.0f, 0.02f));
 		break;
 	//default:
 	//	break;
@@ -236,40 +182,31 @@ glm::vec4 getRay(float mouse_x, float mouse_y){
 	return glm::vec4(result.x, result.y, result.z, 0.0f);
 }
 
-void processMouseMotion(int x, int y){
-	static float coef = -0.0005f;
-	if (startLeft == true){
-		int deltaX = startX - x;
-		int deltaY = startY - y;
-		//cout << "Move " << deltaX << " " << deltaY << endl;
-		camera->translate(0.0f, -coef * deltaY, 0.0f);
-		camera->translate(coef * deltaX, 0.0f, 0.0f);
-		startX = x;
-		startY = y;
-	}
-	glutPostRedisplay();
-}
-
-void mouseWheel(int wheel, int direction, int x, int y) {
-	static float coef = -0.005f; //Coefficient must to be negative
-	if (direction > 0){
-		camera->translate(0.0f, 0.0f, -coef * 2);
-	}
-	else {
-		camera->translate(0.0f, 0.0f, coef * 2);
-	}
-	glutPostRedisplay();
-}
+//void mouseWheel(int wheel, int direction, int x, int y) {
+//	static float coef = -0.005f; //Coefficient must to be negative
+//	if (direction > 0){
+//		camera->translate(0.0f, 0.0f, -coef * 2);
+//	}
+//	else {
+//		camera->translate(0.0f, 0.0f, coef * 2);
+//	}
+//	glutPostRedisplay();
+//}
 
 int main(int argc, char *argv[]){
 	init(argc, argv);
 
 	glutDisplayFunc(displayFunc);
 	glutIdleFunc(idleFunc);
-	glutSpecialFunc(specialKeyFunc);
-	glutKeyboardFunc(keyboardFunc);
-	glutMouseFunc(processMouseButtons);
-	glutMotionFunc(processMouseMotion);
+	Keyboard::setCamera(camera);
+	glutSpecialFunc(Keyboard::specialKeyFunc);
+	glutKeyboardFunc(Keyboard::keyboardFunc);
+
+	Mouse::setCamera(camera);
+	Mouse::setWindow(Constant::SCREEN_WIDTH, Constant::SCREEN_HEIGHT);
+	Mouse::setControllObject((Ball *)(sceneManager.getScene(0)->objects[1]));
+	glutMouseFunc(Mouse::mouseFunc);
+	glutMotionFunc(Mouse::mouseMotionFunc);
 	//glutMouseWheelFunc(mouseWheel);
 
 	glutMainLoop();

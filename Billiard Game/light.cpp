@@ -16,7 +16,6 @@ LightSource::LightSource(){
 }
 
 Light::Light(){
-	//clear();
 	uLight = new LightSource();
 }
 

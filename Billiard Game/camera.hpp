@@ -10,10 +10,10 @@
 #include "util.hpp"
 
 class Camera{
-private:
+public:
+//private:
 	std::vector<glm::mat4> viewMatrixStack;
 	std::vector<glm::mat4>::iterator cur;
-
 	glm::mat4 projectionMatrix;
 public:
 	static GLuint uViewMatrixLoc;
@@ -27,16 +27,16 @@ public:
 	void setViewMatrix(const glm::mat4& viewMatrix);
 	const glm::mat4& getViewMatrix() const;
 	//return View's Position in world space.
-	glm::vec3 getViewPosition() const;
-
+	glm::vec3 getViewPoint() const;
 	glm::mat4 getProjectionMatrix();
 	void setProjectionMatrix(glm::mat4 newProjectionMatrix);
 
-	void translate(const glm::vec3& distance);
-	void translate(float dx, float dy, float dz);
-	void rotate(float angle, const glm::vec3& orientation);
-	void rotate(float angle, float ox, float oy, float oz);
-	void zoom(float coef);
+	void translate(glm::vec3 distance, const Coordinates& coor, const Coordinates& dis);
+	void translate(float dx, float dy, float dz, const Coordinates& coor, const Coordinates& dis);
+	void rotate(float angle, const glm::vec3& orientation, const Coordinates& coor);
+	void rotate(float angle, float ox, float oy, float oz, const Coordinates& coor);
+	void scale(const glm::vec3& factor, const Coordinates& coor);
+	void scale(float factor, const Coordinates& coor);
 
 	void push();
 	void pop();

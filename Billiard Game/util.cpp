@@ -38,12 +38,12 @@ std::string parsingURL(const std::string& path, int urlPasingMode){
 	//Checking that dot is separator extension or not
 	auto checkExtensionDot = [&](std::string::size_type dotIndex)->bool{
 		int first = dotIndex, last = dotIndex;
-		while (int(first) >= 0 && path[first] == '.') first--;
-		while (int(last) < path.length() && path[last] == '.') last++;
+		while ((first >= 0) && (path[first] == '.')) first--;
+		while ((last < (int)path.length()) && (path[last] == '.')) last++;
 
 		int flag = 0;
 		if ((first < 0) || (path[first] == '\\') || (path[first] == '/')) flag++;
-		if ((last >= path.length()) || (path[last] == '\\') || (path[last] == '/')) flag++;
+		if ((last >= (int)path.length()) || (path[last] == '\\') || (path[last] == '/')) flag++;
 		return flag != 2;
 	};
 
@@ -74,7 +74,7 @@ std::string parsingURL(const std::string& path, int urlPasingMode){
 		result += file_name;
 	}
 	if ((urlPasingMode & PARSING_FILE_EXTENSION) != 0x0){
-		if (!result.empty()) result += '.'; 
+		if (!result.empty()) result += '.';
 		result += ext;
 	}
 	return result;
@@ -219,4 +219,118 @@ std::ostream& operator<<(std::ostream& os, const LightSource& ls){
 	os << "      + Linear:\t" << ls.attenuationLinear << std::endl;
 	os << "      + Quadratic:\t" << ls.attenuationQuadratic << std::endl;
 	return os;
+}
+
+glm::vec3 extractScaling(const glm::mat4& matrix){
+	// Extract column vectors of the matrix
+	glm::vec3 col1(matrix[0][0], matrix[0][1], matrix[0][2]);
+	glm::vec3 col2(matrix[1][0], matrix[1][1], matrix[1][2]);
+	glm::vec3 col3(matrix[2][0], matrix[2][1], matrix[2][2]);
+
+	glm::vec3 scaling;
+	// Extract the scaling factors
+	scaling.x = glm::length(col1);
+	scaling.y = glm::length(col2);
+	scaling.z = glm::length(col3);
+
+	// Handle negative scaling
+	if (glm::determinant(matrix) < 0) {
+		scaling.x = -scaling.x;
+		scaling.y = -scaling.y;
+		scaling.z = -scaling.z;
+	}
+	return scaling;
+}
+
+glm::vec3 extractTranslation(const glm::mat4& matrix){
+	glm::vec3 translation;
+	// Extract the translation
+	translation.x = matrix[3][0];
+	translation.y = matrix[3][1];
+	translation.z = matrix[3][2];
+
+	return translation;
+}
+
+void extractAngleAndAxis(const glm::mat4& matrix, float& angle, glm::vec3& axis){
+	float cos = (matrix[0][0] + matrix[1][1] + matrix[2][2] - 1.0f) / 2.0f;
+	if (abs(cos - 1.0f) < EPSILON){
+		angle = 0.0f;
+		axis = xAxis;
+		return;
+	}
+
+	axis.x = (abs(matrix[0][0] - cos) < EPSILON) ? 0 : sqrtf((matrix[0][0] - cos) / (1 - cos));
+	axis.y = (abs(matrix[1][1] - cos) < EPSILON) ? 0 : sqrtf((matrix[1][1] - cos) / (1 - cos));
+	axis.z = (abs(matrix[2][2] - cos) < EPSILON) ? 0 : sqrtf((matrix[2][2] - cos) / (1 - cos));
+
+	float sin = ((matrix[1][2] + matrix[2][0] + matrix[0][1]) -
+		(matrix[2][1] + matrix[0][2] + matrix[1][0])) /
+		(2.0f * (axis.x + axis.y + axis.z));
+
+	angle = atan2f(sin, cos);
+}
+
+void extractYawPitchRoll(const glm::mat4& matrix, float& yaw, float& pitch, float& roll){
+	roll = atan2f(matrix[1][2], matrix[2][2]);
+	pitch = atan2f(-matrix[0][2], sqrtf(powf(matrix[1][2], 2) + powf(matrix[2][2], 2)));
+	yaw = atan2f(matrix[0][1], matrix[0][0]);
+}
+
+void decomposeTRS(const glm::mat4& matrix, glm::vec3& scaling,
+	glm::mat4& rotation, glm::vec3& translation) {
+	// Extract the translation
+	translation.x = matrix[3][0];
+	translation.y = matrix[3][1];
+	translation.z = matrix[3][2];
+
+	// Extract column vectors of the matrix
+	glm::vec3 col1(matrix[0][0], matrix[0][1], matrix[0][2]);
+	glm::vec3 col2(matrix[1][0], matrix[1][1], matrix[1][2]);
+	glm::vec3 col3(matrix[2][0], matrix[2][1], matrix[2][2]);
+
+	// Extract the scaling factors
+	scaling.x = glm::length(col1);
+	scaling.y = glm::length(col2);
+	scaling.z = glm::length(col3);
+
+	// Handle negative scaling
+	if (glm::determinant(matrix) < 0) {
+		scaling.x = -scaling.x;
+		scaling.y = -scaling.y;
+		scaling.z = -scaling.z;
+	}
+
+	// Remove scaling from the matrix
+	if (scaling.x != 0) {
+		col1 /= scaling.x;
+	}
+
+	if (scaling.y != 0) {
+		col2 /= scaling.y;
+	}
+
+	if (scaling.z != 0) {
+		col3 /= scaling.z;
+	}
+
+	rotation[0][0] = col1.x;
+	rotation[0][1] = col1.y;
+	rotation[0][2] = col1.z;
+	rotation[0][3] = 0.0;
+
+	rotation[1][0] = col2.x;
+	rotation[1][1] = col2.y;
+	rotation[1][2] = col2.z;
+	rotation[1][3] = 0.0;
+
+	rotation[2][0] = col3.x;
+	rotation[2][1] = col3.y;
+	rotation[2][2] = col3.z;
+	rotation[2][3] = 0.0;
+
+	rotation[3][0] = 0.0;
+	rotation[3][1] = 0.0;
+	rotation[3][2] = 0.0;
+	rotation[3][3] = 1.0;
 }

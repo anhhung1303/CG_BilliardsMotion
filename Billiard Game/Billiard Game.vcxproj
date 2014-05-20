@@ -71,6 +71,7 @@
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="Constant.cpp" />
+    <ClCompile Include="handling.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material.cpp" />
@@ -90,6 +91,7 @@
     <ClInclude Include="Ball.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="Constant.hpp" />
+    <ClInclude Include="handling.hpp" />
     <ClInclude Include="light.hpp" />
     <ClInclude Include="material.hpp" />
     <ClInclude Include="mesh.hpp" />

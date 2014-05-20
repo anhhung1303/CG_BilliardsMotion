@@ -22,9 +22,15 @@ void Ball::render(Camera * camera, Light * light, GLdouble elapsedTime)
 		//cout << "Coef = " << coef << endl;
 		this->translate(velocity.x * coef, velocity.y * coef, velocity.z * coef);
 
-		/*glm::vec3 rotateAxis = glm::vec3(-velocity.z, 0.0f, velocity.x);
-		float angle = glm::length(velocity) * coef / this->getRadius();
-		this->rotate(angle, rotateAxis);*/
+		if (glm::length(velocity) > 0){
+			glm::vec3 rotateAxis = glm::vec3(-velocity.z, 0.0f, velocity.x);
+			glm::vec4 rotateAxisLocal4 = glm::inverse(this->getModelMatrix()) * glm::vec4(rotateAxis.x, rotateAxis.y, rotateAxis.z, 0.0f);
+			float angle = glm::length(velocity) * coef / (this->getRadius() * glm::length(this->getModelMatrix() * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
+			float angleDegree = angle / 3.14f * 180.0f;
+			cout << "Degeree = " << angleDegree << endl;
+			this->rotate(-angleDegree, glm::vec3(rotateAxisLocal4.x, rotateAxisLocal4.y, rotateAxisLocal4.z));
+		}
+		
 
 		if (glm::length(this->velocity) != 0){
 			//cout << "Current time = " << currentTime << " lastTime = " << this->timeLastFrame << " " << Constant::TIME_FOR_A_FRAME << endl;
