@@ -106,7 +106,9 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		fscanf(inputFile, "ID %d\n", &temp);
 		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);		
 		cameras[idCamera].translate(glm::vec3(x, y, z), WORLD_COORDINATES, WORLD_COORDINATES);
-		//camera->rotate(45, yAxis, VIEW_COORDINATES);
+		float angle;
+		fscanf(inputFile, "ROTATION %f, %f, %f, %f\n", &angle, &x, &y, &z);
+		cameras[idCamera].rotate(angle, glm::vec3(x, y, z), WORLD_COORDINATES);
 		//cout << "Camera position = " << x << " " << y << " " << z << endl;
 
 		GLfloat zNear, zFar, fovy, aspect;
@@ -138,10 +140,21 @@ void Scene::render()
 
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
 		objects[objectId]->render(getUsingCamera(), &lights[0], elapsedTime);
+		if (elapsedTime > Constant::TIME_FOR_A_FRAME){
+			if (objectId > 0){
+				Ball * ball = (Ball *)(this->objects[objectId]);
+				ball->collideWithTable();
+				for (int otherObjectId = objectId + 1; otherObjectId < numOfObjects; ++otherObjectId){
+					//cout << "Collision test: " << objectId << " collides with " << otherObjectId << endl;
+					Ball * otherBall = (Ball *)(this->objects[otherObjectId]);
+					ball->collideWithOtherBall(otherBall);
+				}
+			}
+			timeLastFrame = glutGet(GLUT_ELAPSED_TIME);
+		}
 	}
 
 	if (elapsedTime > Constant::TIME_FOR_A_FRAME){
-		processPhysics();
 		timeLastFrame = glutGet(GLUT_ELAPSED_TIME);
 	}
 }
@@ -238,16 +251,16 @@ void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float ran
 }
 
 void Scene::processPhysics(){
-	for (int objectId = 0; objectId < numOfObjects; ++objectId){
-		if (objectId > 0){
-			Ball * ball = (Ball *)(this->objects[objectId]);
-			ball->collideWithTable();
-			for (int otherObjectId = objectId + 1; otherObjectId < numOfObjects; ++otherObjectId){
-				//cout << "Collision test: " << objectId << " collides with " << otherObjectId << endl;
-				Ball * otherBall = (Ball *)(this->objects[otherObjectId]);
-				ball->collideWithOtherBall(otherBall);
-			}
-		}
-	}
+	//for (int objectId = 0; objectId < numOfObjects; ++objectId){
+	//	if (objectId > 0){
+	//		Ball * ball = (Ball *)(this->objects[objectId]);
+	//		ball->collideWithTable();
+	//		for (int otherObjectId = objectId + 1; otherObjectId < numOfObjects; ++otherObjectId){
+	//			cout << "Collision test: " << objectId << " collides with " << otherObjectId << endl;
+	//			Ball * otherBall = (Ball *)(this->objects[otherObjectId]);
+	//			ball->collideWithOtherBall(otherBall);
+	//		}
+	//	}
+	//}
 }
 

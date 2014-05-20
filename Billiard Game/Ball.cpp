@@ -1,11 +1,11 @@
-#include "Ball.hpp"
+﻿#include "Ball.hpp"
 
 
 Ball::Ball()
 {
 	Object::Object();
 	this->timeLastFrame = 0.0;
-	radius = 5.7;
+	radius = 6.0;
 }
 
 
@@ -22,15 +22,9 @@ void Ball::render(Camera * camera, Light * light, GLdouble elapsedTime)
 		//cout << "Coef = " << coef << endl;
 		this->translate(velocity.x * coef, velocity.y * coef, velocity.z * coef);
 
-		if (glm::length(velocity) > 0){
-			glm::vec3 rotateAxis = glm::vec3(-velocity.z, 0.0f, velocity.x);
-			glm::vec4 rotateAxisLocal4 = glm::inverse(this->getModelMatrix()) * glm::vec4(rotateAxis.x, rotateAxis.y, rotateAxis.z, 0.0f);
-			float angle = glm::length(velocity) * coef / (this->getRadius() * glm::length(this->getModelMatrix() * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
-			float angleDegree = angle / 3.14f * 180.0f;
-			cout << "Degeree = " << angleDegree << endl;
-			this->rotate(-angleDegree, glm::vec3(rotateAxisLocal4.x, rotateAxisLocal4.y, rotateAxisLocal4.z));
-		}
-		
+		/*glm::vec3 rotateAxis = glm::vec3(-velocity.z, 0.0f, velocity.x);
+		float angle = glm::length(velocity) * coef / this->getRadius();
+		this->rotate(angle, rotateAxis);*/
 
 		if (glm::length(this->velocity) != 0){
 			//cout << "Current time = " << currentTime << " lastTime = " << this->timeLastFrame << " " << Constant::TIME_FOR_A_FRAME << endl;
@@ -79,30 +73,69 @@ float Ball::getRadius(){
 void Ball::collideWithOtherBall(Ball * otherBall){
 	float spring = 0.003;
 
-	glm::vec4 otherBallPositionInItsLocal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	glm::vec4 otherBallInWorld = otherBall->getModelMatrix() * otherBallPositionInItsLocal;
-	glm::vec4 otherBallInBallLocal = glm::inverse(this->getModelMatrix()) * otherBallInWorld;
+	glm::vec4 otherBallInWorld = otherBall->getModelMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	//cout << "otherBallInWorld = " << otherBallInWorld << endl;
+	glm::vec4 thisBallInWorld = this->getModelMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	//cout << "thisBallInWorld = " << thisBallInWorld << endl;
 
-	float dx = otherBallInBallLocal.x;
-	float dz = otherBallInBallLocal.z;
+	glm::vec3 collision = glm::vec3(thisBallInWorld.x - otherBallInWorld.x, thisBallInWorld.y - otherBallInWorld.y, thisBallInWorld.z - otherBallInWorld.z);
+	//cout << "collision = " << collision << endl;
+	float ballRadiusInWorld = this->getRadius() * glm::length(this->getModelMatrix() * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	//cout << "radius = " << ballRadiusInWorld << " vs " << glm::length(collision) << endl;
+
+
+	if (glm::length(collision) <= 2 * ballRadiusInWorld){
+		glm::vec3 translateBack = glm::normalize(collision) * (glm::length(collision) - 2 * ballRadiusInWorld);
+		this->translate(translateBack);
+		collision = glm::normalize(collision) * ballRadiusInWorld * 2.0f;
+
+
+		//cout << "Collision detected" << endl;
+		//glm::normalize(collision);
+		//float otherBallci = glm::dot(otherBall->getVelocity(), glm::vec3(collision.x , collision.y, collision.z));
+		//float thisBallci = glm::dot(this->getVelocity(), glm::vec3(collision.x, collision.y, collision.z));
+
+		//float otherBallcf = thisBallci;
+		//float thisBallcf = otherBallci;
+
+		//// Kết quả của vector vận tốc mới
+		//glm::vec3 thisVelocity = this->getVelocity() + (thisBallcf - thisBallci) * glm::vec3(collision.x, collision.y, collision.z);
+		//glm::vec3 otherVelocity = otherBall->getVelocity() + (otherBallcf - otherBallci) * glm::vec3(collision.x, collision.y, collision.z);
+		//this->setVelocity(thisVelocity);
+		//cout << "thisVelocity = " << thisVelocity << endl;
+		//otherBall->setVelocity(otherVelocity);
+		//cout << "otherVelocity = " << otherVelocity << endl;
+
+		glm::vec3 deltaVelocity = this->getVelocity() - otherBall->getVelocity();
+
+		glm::vec3 thisVelocity = this->getVelocity() - ((glm::dot(deltaVelocity, collision) / (glm::length(collision) * glm::length(collision))) * collision);
+		glm::vec3 otherVelocity = otherBall->getVelocity() - ((glm::dot(-deltaVelocity, -collision) / (glm::length(-collision) * glm::length(-collision))) * -collision);
+		this->setVelocity(thisVelocity);
+		cout << "thisVelocity = " << thisVelocity << endl;
+		otherBall->setVelocity(otherVelocity);
+		cout << "otherVelocity = " << otherVelocity << endl;
+	}
+
+	/*float dx = otherBallInLocal.x;
+	float dz = otherBallInLocal.z;
 	float distance = sqrt(dx*dx + dz*dz);
 	float minDist = 2 * this->getRadius();
 	//cout << "distance = " << distance << endl;
 	//cout << "minDist = " << minDist << endl;
 	if (distance < minDist) {
-		float angle = atan2(dz, dx);
-		cout << "Angle = " << angle << endl;
-		float targetX = cos(angle) * minDist;
-		float targetZ = sin(angle) * minDist;
-		cout << "targetX = " << targetX << " targetZ = " << targetZ << endl;
-		float ax = (targetX - otherBallInBallLocal.x) * spring;
-		float az = (targetZ - otherBallInBallLocal.z) * spring;
-		cout << "ax = " << ax << " az = " << az << endl;
-		this->setVelocity(glm::vec3(this->velocity.x - ax, 0.0f, this->velocity.z - az));
-		otherBall->setVelocity(glm::vec3(otherBall->velocity.x + ax, 0.0f, otherBall->velocity.z + az));
+	float angle = atan2(dz, dx);
+	cout << "Angle = " << angle << endl;
+	float targetX = cos(angle) * minDist;
+	float targetZ = sin(angle) * minDist;
+	cout << "targetX = " << targetX << " targetZ = " << targetZ << endl;
+	float ax = (targetX - otherBallInBallLocal.x) * spring;
+	float az = (targetZ - otherBallInBallLocal.z) * spring;
+	cout << "ax = " << ax << " az = " << az << endl;
+	this->setVelocity(glm::vec3(this->velocity.x - ax, 0.0f, this->velocity.z - az));
+	otherBall->setVelocity(glm::vec3(otherBall->velocity.x + ax, 0.0f, otherBall->velocity.z + az));
 
-		cout << "Collision detected" << endl;
-	}
+	cout << "Collision detected" << endl;
+	}*/
 }
 
 void Ball::collideWithTable(){
@@ -118,17 +151,24 @@ void Ball::collideWithTable(){
 	glm::vec3 oldPosition = ballInWorld3 - velocity;
 	if (absZ + radiusInWorld >= 0.07){
 		inverseZ = -1;
-		//float coef = -(0.07 - absZ + radiusInWorld) / ((velocity.z >= 0) ? velocity.z : -velocity.z);
-		//this->translate(velocity*coef);
-		this->translate(velocity*-1.0f);
+		if (ballInWorld3.z > 0){
+			this->translate(glm::vec3(0.0f, 0.0f, -2.0f * (absZ + radiusInWorld - 0.07f)));
+		}
+		else {
+			this->translate(glm::vec3(0.0f, 0.0f, 2.0f * (absZ + radiusInWorld - 0.07f)));
+		}
+
 	}
 	float absX = (ballInWorld3.x > 0) ? ballInWorld3.x : -ballInWorld3.x;
 	//cout << "absX = " << absX << endl;
 	if (absX + radiusInWorld >= 0.143){
 		inverseX = -1;
-		//float coef = -(0.143 - absX + radiusInWorld) / ((velocity.x >= 0) ? velocity.x : -velocity.x);
-		//this->translate(velocity*coef);
-		this->translate(velocity*-1.0f);
+		if (ballInWorld3.x > 0){
+			this->translate(glm::vec3(-2.0f * (absX + radiusInWorld - 0.143f), 0.0f, 0.0f));
+		}
+		else {
+			this->translate(glm::vec3(2.0f * (absX + radiusInWorld - 0.143f), 0.0f, 0.0f));
+		}
 	}
 	this->setVelocity(glm::vec3(inverseX * velocity.x, 0.0f, inverseZ * velocity.z));
 

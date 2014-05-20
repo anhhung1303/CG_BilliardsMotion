@@ -2,7 +2,8 @@
 
 
 float Keyboard::coef = 0.05f;
-Camera* Keyboard::cam = NULL;
+Camera * Keyboard::cam = NULL;
+SceneManager * Keyboard::sceneManager = NULL;
 Camera* Mouse::cam = NULL;
 glm::ivec2 Mouse::dragStartPos = glm::ivec2(-1);
 int Mouse::windowWidth = 800, Mouse::windowHeight = 600;
@@ -16,6 +17,10 @@ Ball * Mouse::ball = NULL;
 
 void Keyboard::setCamera(Camera* cam){
 	Keyboard::cam = cam;
+}
+
+void Keyboard::setSceneManager(SceneManager * newSceneManager){
+	Keyboard::sceneManager = newSceneManager;
 }
 
 void Keyboard::specialKeyFunc(int key, int x, int y){
@@ -49,11 +54,22 @@ void Keyboard::specialKeyFunc(int key, int x, int y){
 	default:
 		return;
 	}
+	cout << "View point = " << cam->getViewPoint() << endl;
 	glutPostRedisplay();
 }
 
 void Keyboard::keyboardFunc(unsigned char key, int x, int y){
 	//Do something here
+	switch (key){
+	case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+		Keyboard::sceneManager->getScene(0)->setUsingCamera(key - '0');
+		Keyboard::cam = Keyboard::sceneManager->getScene(0)->getUsingCamera();
+		Mouse::setCamera(Keyboard::cam);
+		break;
+	default:
+		return;
+	}
+	glutPostRedisplay();
 }
 
 void Mouse::setCamera(Camera* cam){
@@ -144,7 +160,7 @@ void Mouse::mouseMotionFunc(int x, int y){
 		glutPostRedisplay();
 	}
 	else if (isRightDown){
-
+		//Do something
 	}
 }
 

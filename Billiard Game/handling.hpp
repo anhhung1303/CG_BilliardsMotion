@@ -7,15 +7,18 @@
 #include "camera.hpp"
 #include "util.hpp"
 #include "Ball.hpp"
+#include "SceneManager.hpp"
 
 class Keyboard{
 private:
 	static bool keyBuffer[256];
 	static Camera* cam;
+	static SceneManager* sceneManager;
 	static float coef;
 
 public:
 	static void setCamera(Camera* camera);
+	static void setSceneManager(SceneManager * newSceneManager);
 
 	static void specialKeyFunc(int key, int x, int y);
 	static void keyboardFunc(unsigned char key, int x, int y);
