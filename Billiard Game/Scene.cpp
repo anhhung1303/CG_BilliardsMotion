@@ -10,6 +10,8 @@ Scene::Scene()
 
 	lights = NULL;
 	numOfLights = 0;
+
+	timeLastFrame = 0.0f;
 }
 
 
@@ -81,6 +83,9 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		fscanf(inputFile, "POS/DIR %f, %f, %f\n", &x, &y, &z);
 		LightSource * lightSource = new LightSource();
 		lightSource->position = glm::vec3(x, y, z);
+		lightSource->ambientIntensity = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
+		lightSource->diffuseIntensity = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
+		lightSource->specularIntensity = glm::vec4(0.75f, 0.75f, 0.75f, 1.0f);
 		lights[idLight].setLightSource(lightSource);
 		char type[10];
 		fscanf(inputFile, "TYPE %s\n", type);
@@ -99,9 +104,11 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 	for (int idCamera = 0; idCamera < numOfCameras; ++idCamera){
 		int temp;
 		fscanf(inputFile, "ID %d\n", &temp);
-		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);
-		cameras[idCamera].push();
-		cameras[idCamera].translate(glm::vec3(x, y, z));
+		fscanf(inputFile, "POSITION %f, %f, %f\n", &x, &y, &z);		
+		cameras[idCamera].translate(glm::vec3(x, y, z), WORLD_COORDINATES, WORLD_COORDINATES);
+		float angle;
+		fscanf(inputFile, "ROTATION %f, %f, %f, %f\n", &angle, &x, &y, &z);
+		cameras[idCamera].rotate(angle, glm::vec3(x, y, z), VIEW_COORDINATES);
 		//cout << "Camera position = " << x << " " << y << " " << z << endl;
 
 		GLfloat zNear, zFar, fovy, aspect;
@@ -111,6 +118,7 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		fscanf(inputFile, "ASPECT %f\n", &aspect);
 		cameras[idCamera].setProjectionMatrix(glm::perspective(fovy, aspect, zNear, zFar));
 		//cout << fovy << " " << aspect  << " " << zNear << " " << zFar << endl;
+		cameras[idCamera].push();
 	}
 	
 	setUsingCamera(0);
@@ -120,6 +128,8 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 // render 3D scene
 void Scene::render()
 {
+	GLdouble elapsedTime = glutGet(GLUT_ELAPSED_TIME) - timeLastFrame;
+
 	Program::useProgram(NULL);
 
 	glMatrixMode(GL_PROJECTION);
@@ -129,7 +139,23 @@ void Scene::render()
 	drawGroundGrid(0.0f, 0.0f, 50.0f, 50.0f, 0.1f);
 
 	for (int objectId = 0; objectId < numOfObjects; ++objectId){
-		objects[objectId]->render(getUsingCamera(), &lights[0]);
+		objects[objectId]->render(getUsingCamera(), &lights[0], elapsedTime);
+		if (elapsedTime > Constant::TIME_FOR_A_FRAME){
+			if (objectId > 0){
+				Ball * ball = (Ball *)(this->objects[objectId]);
+				ball->collideWithTable();
+				for (int otherObjectId = objectId + 1; otherObjectId < numOfObjects; ++otherObjectId){
+					//cout << "Collision test: " << objectId << " collides with " << otherObjectId << endl;
+					Ball * otherBall = (Ball *)(this->objects[otherObjectId]);
+					ball->collideWithOtherBall(otherBall);
+				}
+			}
+			timeLastFrame = glutGet(GLUT_ELAPSED_TIME);
+		}
+	}
+
+	if (elapsedTime > Constant::TIME_FOR_A_FRAME){
+		timeLastFrame = glutGet(GLUT_ELAPSED_TIME);
 	}
 }
 
@@ -211,6 +237,30 @@ void Scene::drawGroundGrid(float centerX, float centerZ, float rangeX, float ran
 			glVertex3f(centerX + rangeX, 0.0f, centerZ - line);
 		}
 	}
+	glColor3f(1.0f, 1.0f, 0.0f);
+	glVertex3f(-50.0f, 0.0f, 0.07f);
+	glVertex3f(50.0f, 0.0f, 0.07f);
+	glVertex3f(-50.0f, 0.0f, -0.07f);
+	glVertex3f(50.0f, 0.0f, -0.07f);
+
+	glVertex3f(0.143f, 0.0f, -50.0f);
+	glVertex3f(0.143f, 0.0f, 50.0f);
+	glVertex3f(-0.143f, 0.0f, -50.0f);
+	glVertex3f(-0.143f, 0.0f, 50.0f);
 	glEnd();
+}
+
+void Scene::processPhysics(){
+	//for (int objectId = 0; objectId < numOfObjects; ++objectId){
+	//	if (objectId > 0){
+	//		Ball * ball = (Ball *)(this->objects[objectId]);
+	//		ball->collideWithTable();
+	//		for (int otherObjectId = objectId + 1; otherObjectId < numOfObjects; ++otherObjectId){
+	//			cout << "Collision test: " << objectId << " collides with " << otherObjectId << endl;
+	//			Ball * otherBall = (Ball *)(this->objects[otherObjectId]);
+	//			ball->collideWithOtherBall(otherBall);
+	//		}
+	//	}
+	//}
 }
 

@@ -29,7 +29,6 @@ void Material::clear(){
 
 bool Material::setMaterial(const aiMaterial* material){
 	clear();
-
 	this->uMaterial = new LightMaterial();
 	aiColor4D color;
 
