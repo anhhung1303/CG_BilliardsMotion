@@ -54,7 +54,6 @@ void Keyboard::specialKeyFunc(int key, int x, int y){
 	default:
 		return;
 	}
-	cout << "View point = " << cam->getViewPoint() << endl;
 	glutPostRedisplay();
 }
 
@@ -124,8 +123,8 @@ void Mouse::mouseFunc(int button, int state, int x, int y){
 			glm::vec3 velocity = glm::vec3(secondRay.x - firstRay.x, secondRay.y - firstRay.y, secondRay.z - firstRay.z);
 			if (glm::length(velocity) > 0){
 				velocity = glm::normalize(velocity);
-				cout << "velocity = " << velocity.x << " " << velocity.y << " " << velocity.z << " " << endl;
-				cout << "length = " << glm::length(velocity) << endl;
+				//cout << "velocity = " << velocity.x << " " << velocity.y << " " << velocity.z << " " << endl;
+				//cout << "length = " << glm::length(velocity) << endl;
 
 				ball->setVelocity(glm::vec3(velocity.x * 0.02f, 0.0f, velocity.z * 0.02f));
 			}

@@ -22,11 +22,15 @@ void Ball::render(Camera * camera, Light * light, GLdouble elapsedTime)
 		//cout << "Coef = " << coef << endl;
 		this->translate(velocity.x * coef, velocity.y * coef, velocity.z * coef);
 
-		/*glm::vec3 rotateAxis = glm::vec3(-velocity.z, 0.0f, velocity.x);
-		float angle = glm::length(velocity) * coef / this->getRadius();
-		this->rotate(angle, rotateAxis);*/
-
 		if (glm::length(this->velocity) != 0){
+			glm::vec4 rotateAxisWorld = glm::vec4(-velocity.z, 0.0f, velocity.x, 0.0f);
+			glm::vec4 rotateAxisLocal = glm::inverse(this->getModelMatrix()) * rotateAxisWorld;
+
+			float angle = glm::length(velocity) * coef / (this->getRadius() * glm::length(this->getModelMatrix() * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f)));
+			//cout << "Angle = " << angle / 3.14f * 180.0f << endl;
+			this->rotate(-angle / 3.14f * 180.0f, glm::vec3(rotateAxisLocal.x, rotateAxisLocal.y, rotateAxisLocal.z));
+
+
 			//cout << "Current time = " << currentTime << " lastTime = " << this->timeLastFrame << " " << Constant::TIME_FOR_A_FRAME << endl;
 			if (glm::length(this->velocity) <= glm::length(this->acceleration)){
 				setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -74,9 +78,7 @@ void Ball::collideWithOtherBall(Ball * otherBall){
 	float spring = 0.003;
 
 	glm::vec4 otherBallInWorld = otherBall->getModelMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	//cout << "otherBallInWorld = " << otherBallInWorld << endl;
 	glm::vec4 thisBallInWorld = this->getModelMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	//cout << "thisBallInWorld = " << thisBallInWorld << endl;
 
 	glm::vec3 collision = glm::vec3(thisBallInWorld.x - otherBallInWorld.x, thisBallInWorld.y - otherBallInWorld.y, thisBallInWorld.z - otherBallInWorld.z);
 	//cout << "collision = " << collision << endl;
@@ -84,10 +86,12 @@ void Ball::collideWithOtherBall(Ball * otherBall){
 	//cout << "radius = " << ballRadiusInWorld << " vs " << glm::length(collision) << endl;
 
 
-	if (glm::length(collision) <= 2 * ballRadiusInWorld){
+	if (glm::length(collision) < 2 * ballRadiusInWorld){
+		glm::vec3 deltaVelocity = this->getVelocity() - otherBall->getVelocity();
 		glm::vec3 translateBack = glm::normalize(collision) * (glm::length(collision) - 2 * ballRadiusInWorld);
 		this->translate(translateBack);
-		collision = glm::normalize(collision) * ballRadiusInWorld * 2.0f;
+		//collision = glm::normalize(collision) * ballRadiusInWorld * 2.0f;
+		//cout << "collision = " << collision << " length collision = " << glm::length(collision) << endl;
 
 
 		//cout << "Collision detected" << endl;
@@ -105,15 +109,13 @@ void Ball::collideWithOtherBall(Ball * otherBall){
 		//cout << "thisVelocity = " << thisVelocity << endl;
 		//otherBall->setVelocity(otherVelocity);
 		//cout << "otherVelocity = " << otherVelocity << endl;
-
-		glm::vec3 deltaVelocity = this->getVelocity() - otherBall->getVelocity();
-
+		
 		glm::vec3 thisVelocity = this->getVelocity() - ((glm::dot(deltaVelocity, collision) / (glm::length(collision) * glm::length(collision))) * collision);
 		glm::vec3 otherVelocity = otherBall->getVelocity() - ((glm::dot(-deltaVelocity, -collision) / (glm::length(-collision) * glm::length(-collision))) * -collision);
-		this->setVelocity(thisVelocity);
-		cout << "thisVelocity = " << thisVelocity << endl;
-		otherBall->setVelocity(otherVelocity);
-		cout << "otherVelocity = " << otherVelocity << endl;
+		this->setVelocity(thisVelocity * 1.5f);
+		//cout << "thisVelocity = " << thisVelocity << endl;
+		otherBall->setVelocity(otherVelocity * 1.5f);
+		//cout << "otherVelocity = " << otherVelocity << endl;
 	}
 
 	/*float dx = otherBallInLocal.x;

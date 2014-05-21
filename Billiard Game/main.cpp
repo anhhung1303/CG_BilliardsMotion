@@ -30,7 +30,6 @@ using namespace std;
 
 SceneManager sceneManager;
 ResourceManager resourceManager;
-Camera * camera;
 
 void init(int argc, char *argv[]){
 	glutInit(&argc, argv);
@@ -66,13 +65,13 @@ void init(int argc, char *argv[]){
 
 	resourceManager.load(Constant::RESOURCE_FILE);
 	sceneManager.load(Constant::SCENE_FILE, & resourceManager);
-	camera = sceneManager.getScene(0)->getUsingCamera();
 }
 
 void displayFunc(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	sceneManager.renderScene(0);
+	//cout << "View point = " << sceneManager.getScene(0)->getUsingCamera()->getViewPoint() << endl;
 	glutSwapBuffers();
 }
 
@@ -85,12 +84,13 @@ int main(int argc, char *argv[]){
 
 	glutDisplayFunc(displayFunc);
 	glutIdleFunc(idleFunc);
-	Keyboard::setCamera(camera);
+	sceneManager.getScene(0)->setUsingCamera(0);
+	Keyboard::setCamera(sceneManager.getScene(0)->getUsingCamera());
 	Keyboard::setSceneManager(&sceneManager);
 	glutSpecialFunc(Keyboard::specialKeyFunc);
 	glutKeyboardFunc(Keyboard::keyboardFunc);
 
-	Mouse::setCamera(camera);
+	Mouse::setCamera(sceneManager.getScene(0)->getUsingCamera());
 	Mouse::setWindow(Constant::SCREEN_WIDTH, Constant::SCREEN_HEIGHT);
 	Mouse::setControllObject((Ball *)(sceneManager.getScene(0)->objects[1]));
 	glutMouseFunc(Mouse::mouseFunc);

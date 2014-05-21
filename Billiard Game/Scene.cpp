@@ -108,7 +108,7 @@ void Scene::load(char * sceneFilePath, ResourceManager * resourceManager)
 		cameras[idCamera].translate(glm::vec3(x, y, z), WORLD_COORDINATES, WORLD_COORDINATES);
 		float angle;
 		fscanf(inputFile, "ROTATION %f, %f, %f, %f\n", &angle, &x, &y, &z);
-		cameras[idCamera].rotate(angle, glm::vec3(x, y, z), WORLD_COORDINATES);
+		cameras[idCamera].rotate(angle, glm::vec3(x, y, z), VIEW_COORDINATES);
 		//cout << "Camera position = " << x << " " << y << " " << z << endl;
 
 		GLfloat zNear, zFar, fovy, aspect;
