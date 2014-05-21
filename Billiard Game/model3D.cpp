@@ -150,13 +150,13 @@ Node* Model3D::builtNode(const aiNode* node){
 
 void Model3D::translate(glm::vec3 distance, const Coordinates& coor, const Coordinates& dis){
 	switch (dis){
-	case MODEL_COORINATES:
+	case MODEL_COORDINATES:
 		if (coor == WORLD_COORDINATES){ //Convert distance from model coordiantes to world coordiantes
 			distance = extractScaling(root->modelMatrix) * distance;
 		}
 		break;
 	case WORLD_COORDINATES:
-		if (coor == MODEL_COORINATES){ //Convert distance form view coordiante to world coordiante
+		if (coor == MODEL_COORDINATES){ //Convert distance form view coordiante to world coordiante
 			distance = (1.0f / extractScaling(root->modelMatrix)) * distance;
 		}
 		break;
@@ -168,7 +168,7 @@ void Model3D::translate(glm::vec3 distance, const Coordinates& coor, const Coord
 	case WORLD_COORDINATES:
 		root->modelMatrix = glm::translate(distance) * root->modelMatrix;
 		break;
-	case MODEL_COORINATES:
+	case MODEL_COORDINATES:
 		root->modelMatrix = glm::translate(root->modelMatrix, distance);
 		break;
 	}
@@ -184,7 +184,7 @@ void Model3D::rotate(float angle, glm::vec3 axis, const Coordinates& coor){
 	case WORLD_COORDINATES:
 		root->modelMatrix = glm::rotate(angle, axis) * root->modelMatrix;
 		break;
-	case MODEL_COORINATES:
+	case MODEL_COORDINATES:
 		root->modelMatrix = glm::rotate(root->modelMatrix, angle, axis);
 		break;
 	}
@@ -200,7 +200,7 @@ void Model3D::scale(glm::vec3 factor, const Coordinates& coor){
 	case WORLD_COORDINATES:
 		root->modelMatrix = glm::scale(factor) * root->modelMatrix;
 		break;
-	case MODEL_COORINATES:
+	case MODEL_COORDINATES:
 		root->modelMatrix = glm::scale(root->modelMatrix, factor);
 		break;
 	}

@@ -148,7 +148,7 @@ void initData(){
 
 	model = new Model3D();
 	model->loadModel(MODEL_FILE);
-	model->scale(0.5, MODEL_COORINATES);
+	model->scale(0.5, MODEL_COORDINATES);
 }
 
 void displayFunc(){
